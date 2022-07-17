@@ -25,6 +25,7 @@ export class Escenario {
         return `
             Personaje: ${this.getPersonaje()}
             Lugar: ${this.getLugar()}
+            asdasd
         `;
     }
 }
