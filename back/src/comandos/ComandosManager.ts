@@ -3,6 +3,11 @@ import { Escenario } from "../Escenario";
 export class ComandoManager {
     protected escenario: Escenario = Escenario.getInstance();
     static instance: ComandoManager;
+
+    comandos: IComando[] = [
+        new GetEscenario,
+        new GetPersonaje
+    ]
     
     constructor() {}
 
@@ -13,18 +18,19 @@ export class ComandoManager {
         return ComandoManager.instance
     }
 
-    // IMPLEMENTAR EL HELP
-    public getComandos() {
-        return `
-            Iniciar: iniciar
-        `;
-    };
+    private getComando(comando: string): IComando {
+        const comandoFound = this.comandos.find((com) => com.esComando(comando))
+        if (comandoFound) {
+            return comandoFound
+        } else {
+            throw new Error('comando no encontrado');
+        }
+    }
 
-    // IMPLEMENTAR EJECUTOR DE COMANDOS
     public ejecutarComando(comando: string) {
-        console.log(comando)
-        if (comando.toLowerCase() === 'iniciar') {
-            return this.escenario.getEscenario()
+        const comandoFound: IComando = this.getComando(comando)
+        if (comandoFound) {
+            return comandoFound.ejecutar()
         };
     };
 }
