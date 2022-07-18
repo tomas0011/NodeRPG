@@ -13,10 +13,14 @@ function ConsoleOutput(params: { commandResponseAction: any }) {
     useEffect(() => {
         console.log(params.commandResponseAction)
         if(params.commandResponseAction) {
-            setCommandResponses([
-                ...commandResponses,
-                params.commandResponseAction
-            ])
+            if (params.commandResponseAction.command === 'clear') {
+                setCommandResponses([])
+            } else {
+                setCommandResponses([
+                    ...commandResponses,
+                    params.commandResponseAction
+                ])
+            }
         }
     }, [params.commandResponseAction])
 

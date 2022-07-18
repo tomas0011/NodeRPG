@@ -19,7 +19,14 @@ export function ConsoleInput(params: { setCommandResponseAction: any }) {
 
     function handlerOnSubmit(event: any) {
         event.preventDefault()
-        RequestManager.getInstance().get(`/command?command=${inputValue}`, responseTrigger)
+        if (inputValue === 'clear') {
+            responseTrigger({
+                command: 'clear',
+                content: ''
+            })
+        } else {
+            RequestManager.getInstance().get(`/command?command=${inputValue}`, responseTrigger)
+        }
         setInputValue('')
     }
 
