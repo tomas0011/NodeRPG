@@ -2,7 +2,7 @@ import { Espada } from '../../Objeto/objetos/Espada';
 import { PersonajeJugable } from '../../Personaje/personajes/Jugador';
 import IComando from '../IComando';
 
-class GetPersonaje implements IComando {
+class GetStatus implements IComando {
     getKey() {
         return 'status'
     }
@@ -17,4 +17,4 @@ class GetPersonaje implements IComando {
     }
 }
 
-export default GetPersonaje;
+export default GetStatus;

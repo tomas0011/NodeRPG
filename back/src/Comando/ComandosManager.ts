@@ -3,9 +3,8 @@ import IComando from './IComando';
 import {
     GetEscenario,
     GetHelp,
-    GetInventario,
-    GetPersonaje
-} from './comandos';
+    GetStatus
+} from './';
 
 class ComandoManager {
     protected escenario: Escenario = Escenario.getInstance();
@@ -14,8 +13,7 @@ class ComandoManager {
     public comandos: IComando[] = [
         new GetEscenario,
         new GetHelp,
-        new GetInventario,
-        new GetPersonaje
+        new GetStatus
     ]
     
     constructor() {}
