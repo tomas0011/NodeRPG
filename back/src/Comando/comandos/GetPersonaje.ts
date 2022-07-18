@@ -1,4 +1,6 @@
-class GetPersonaje {
+import IComando from './IComando';
+
+class GetPersonaje implements IComando {
     getKey() {
         return 'status'
     }

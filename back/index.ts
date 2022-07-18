@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { ComandoManager } from './src/Comando/ComandosManager';
+import ComandoManager from './src/Comando/ComandosManager';
 
 const app = express();
 const port = 3001;

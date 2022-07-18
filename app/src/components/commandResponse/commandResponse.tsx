@@ -3,7 +3,9 @@
 function CommandResponse(params: { commandResponse: any }) {
     return (
         <div className="CommandResponse">
-            <h1>{'> '}{params.commandResponse.content}</h1>
+            <hr />
+            <p>{'> '}{params.commandResponse.content}</p>
+            <hr />
         </div>
     );
 }

@@ -1,6 +1,9 @@
-class GetEscenario {
+import { Escenario } from '../../Escenario/Escenario';
+import IComando from '../IComando';
+
+class GetEscenario implements IComando {
     getKey() {
-        return 'inicio'
+        return 'escenario'
     }
 
     esComando(comando: string) {
@@ -8,7 +11,7 @@ class GetEscenario {
     }
 
     ejecutar() {
-        return 'comando inicio ejecutado'
+        return Escenario.getInstance().getEscenario()
     }
 }
 

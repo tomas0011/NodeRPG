@@ -1,6 +1,7 @@
-import { ComandoManager } from "../ComandosManager";
+import ComandoManager from "../ComandosManager";
+import IComando from './IComando';
 
-class GetHelp {
+class GetHelp implements IComando {
     getKey() {
         return 'help'
     }

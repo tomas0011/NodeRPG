@@ -4,12 +4,18 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "start": "tsc && node dist/index.js"
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "start": "npm run build && concurrently \"npm run build:watch\" \"npm run serve:watch\"",
+    "serve": "node dist/index.js",
+    "serve:watch": "nodemon dist/index.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "typescript": "^3.3.3"
+    "typescript": "^3.3.3",
+    "concurrently": "^7.2.2",
+    "nodemon": "^2.0.19"
   },
   "dependencies": {
     "cors": "^2.8.5",

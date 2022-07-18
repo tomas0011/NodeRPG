@@ -1,10 +1,13 @@
 import { Escenario } from "../Escenario";
-import GetEscenario from './comandos/GetEscenario'
-import GetHelp from "./comandos/GetHelp";
-import GetInventario from "./comandos/GetInventario";
-import GetPersonaje from './comandos/GetPersonaje';
+import IComando from './comandos/IComando';
+import {
+    GetEscenario,
+    GetHelp,
+    GetInventario,
+    GetPersonaje
+} from './comandos';
 
-export class ComandoManager {
+class ComandoManager {
     protected escenario: Escenario = Escenario.getInstance();
     static instance: ComandoManager;
 
@@ -25,7 +28,7 @@ export class ComandoManager {
     }
 
     private getComando(comando: string): IComando {
-        const comandoFound = this.comandos.find((com) => com.esComando(comando))
+        const comandoFound: IComando = this.comandos.find((comandoParaEncontrar: IComando) => comandoParaEncontrar.esComando(comando))
         if (comandoFound) {
             return comandoFound
         } else {
@@ -42,3 +45,5 @@ export class ComandoManager {
         };
     };
 }
+
+export default ComandoManager
