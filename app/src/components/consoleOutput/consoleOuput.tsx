@@ -30,4 +30,3 @@ function ConsoleOutput(params: { commandResponseAction: any }) {
 }
 
 export default ConsoleOutput;
-  

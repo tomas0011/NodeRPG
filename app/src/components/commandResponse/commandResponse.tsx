@@ -9,4 +9,3 @@ function CommandResponse(params: { commandResponse: any }) {
 }
 
 export default CommandResponse;
-  

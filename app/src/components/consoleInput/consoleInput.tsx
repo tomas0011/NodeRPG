@@ -31,4 +31,3 @@ export function ConsoleInput(params: { setCommandResponseAction: any }) {
 }
 
 export default ConsoleInput;
-  
