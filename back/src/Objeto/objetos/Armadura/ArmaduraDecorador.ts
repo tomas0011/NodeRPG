@@ -1,21 +1,15 @@
-import { Personaje } from "../../../Personaje/Personaje";
-import { Armadura } from "./Armadura";
+import { Objeto } from "../../Objeto";
+import { IPortadorArmadura } from "./Armadura";
 
+export class ArmaduraDecorador extends Objeto implements IPortadorArmadura {
+    portadorDeArmadura: IPortadorArmadura ;
 
-export class ArmaduraDecorador extends Armadura {
-    decorado: Armadura | Personaje;
-    defensa: number;
-    constructor(nombre: String, clase: String = null, defensa: number, decorado: Armadura | Personaje){
-        super(nombre, clase, defensa)
-        this.defensa = defensa;
+    constructor(nombre: string, clase: string,portadorDeArmadura: IPortadorArmadura){
+        super(nombre,clase);
+        this.portadorDeArmadura = portadorDeArmadura;
     }
 
-    setArmadura(nuevoDecorado: Armadura | Personaje){
-        this.decorado = nuevoDecorado;
+    claseDeArmadura(destreza: number): number { 
+        return this.portadorDeArmadura.claseDeArmadura(destreza)
     }
-
-    recibirDaño(daño: number): number {
-        return this.decorado.recibirDaño(daño - this.defensa);
-    }
-    
 }
