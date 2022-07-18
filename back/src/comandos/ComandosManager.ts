@@ -1,12 +1,18 @@
 import { Escenario } from "../Escenario";
+import GetEscenario from './comandos/GetEscenario'
+import GetHelp from "./comandos/GetHelp";
+import GetInventario from "./comandos/GetInventario";
+import GetPersonaje from './comandos/GetPersonaje'
 
 export class ComandoManager {
     protected escenario: Escenario = Escenario.getInstance();
     static instance: ComandoManager;
 
-    comandos: IComando[] = [
+    public comandos: IComando[] = [
         new GetEscenario,
-        new GetPersonaje
+        new GetPersonaje,
+        new GetInventario,
+        new GetHelp
     ]
     
     constructor() {}
@@ -31,6 +37,8 @@ export class ComandoManager {
         const comandoFound: IComando = this.getComando(comando)
         if (comandoFound) {
             return comandoFound.ejecutar()
+        } else {
+            throw new Error('Comando no encontrado')
         };
     };
 }

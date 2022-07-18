@@ -1,6 +1,6 @@
-class GetEscenario {
+class GetInventario {
     getKey() {
-        return 'inicio'
+        return 'inventario'
     }
 
     esComando(comando: string) {
@@ -8,8 +8,8 @@ class GetEscenario {
     }
 
     ejecutar() {
-        return 'comando inicio ejecutado'
+        return 'comando de inventario'
     }
 }
 
-export default GetEscenario;
+export default GetInventario;

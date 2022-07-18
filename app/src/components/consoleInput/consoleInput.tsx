@@ -11,7 +11,10 @@ export function ConsoleInput(params: { setCommandResponseAction: any }) {
     }
 
     function responseTrigger(response: any) {
-        params.setCommandResponseAction(response)
+        params.setCommandResponseAction({
+            command: response.command,
+            content: response.content
+        })
     }
 
     function handlerOnSubmit(event: any) {
