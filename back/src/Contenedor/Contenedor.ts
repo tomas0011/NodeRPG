@@ -1,15 +1,20 @@
 import { Objeto } from "../Objeto/Objeto";
 
 export abstract class Contenedor{
-    objetos: Array<Objeto> = []
-    puedeContenerUnContenedor: Boolean = false;
+    objetos: Objeto[] = []
+
+    puedeContener(contenedor: Contenedor): Boolean {
+        return false
+    };
 
     getObjetos(){
         return this.objetos
     }
+    
     agregarObjeto(objeto: Objeto){
         this.objetos.push(objeto)
     }
+
     quitarObjeto(objeto: Objeto){
         let posicion = this.objetos.indexOf(objeto)
         if(posicion != -1){

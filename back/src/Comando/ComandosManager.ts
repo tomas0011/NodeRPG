@@ -2,7 +2,7 @@ import { Escenario } from "../Escenario";
 import GetEscenario from './comandos/GetEscenario'
 import GetHelp from "./comandos/GetHelp";
 import GetInventario from "./comandos/GetInventario";
-import GetPersonaje from './comandos/GetPersonaje'
+import GetPersonaje from './comandos/GetPersonaje';
 
 export class ComandoManager {
     protected escenario: Escenario = Escenario.getInstance();
@@ -10,9 +10,9 @@ export class ComandoManager {
 
     public comandos: IComando[] = [
         new GetEscenario,
-        new GetPersonaje,
+        new GetHelp,
         new GetInventario,
-        new GetHelp
+        new GetPersonaje
     ]
     
     constructor() {}
