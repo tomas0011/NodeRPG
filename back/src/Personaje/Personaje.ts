@@ -1,10 +1,11 @@
 import { Inventario } from "../Contenedor/Inventario";
-import { IPortadorArmadura } from "../Objeto/objetos/Armadura/Armadura";
+import { IPortadorArmadura } from "../Objeto/objetos/Armadura/IPortadorDeArmadura";
 
 export class Personaje implements IPortadorArmadura{
     vidaMaxima: number
     vidaActual: number
     inventario: Inventario
+    destreza: number =  1;
 
     constructor(vidaMaxima: number = 10){
         this.vidaMaxima = vidaMaxima
@@ -12,8 +13,12 @@ export class Personaje implements IPortadorArmadura{
         this.inventario = new Inventario()
     }
 
-    claseDeArmadura(destreza: number): number {
-        return 10 + destreza;
+    getDestreza(): number {
+        return this.destreza;
+    }
+    
+    claseDeArmadura(): number {
+        return 10 + this.getDestreza();
     }
 
     getVidaMaxima(): number {
@@ -36,4 +41,6 @@ export class Personaje implements IPortadorArmadura{
     getNombre(){
         return '';
     }
+
+    
 } 

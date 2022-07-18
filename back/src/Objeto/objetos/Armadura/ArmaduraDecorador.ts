@@ -1,15 +1,20 @@
 import { Objeto } from "../../Objeto";
-import { IPortadorArmadura } from "./Armadura";
+import { IPortadorArmadura } from "./IPortadorDeArmadura";
 
 export class ArmaduraDecorador extends Objeto implements IPortadorArmadura {
     portadorDeArmadura: IPortadorArmadura ;
-
+    destreza: number;
+    
     constructor(nombre: string, clase: string,portadorDeArmadura: IPortadorArmadura){
         super(nombre,clase);
         this.portadorDeArmadura = portadorDeArmadura;
     }
 
-    claseDeArmadura(destreza: number): number { 
-        return this.portadorDeArmadura.claseDeArmadura(destreza)
+    getDestreza(){
+        return this.portadorDeArmadura.getDestreza();
+    }
+
+    claseDeArmadura(): number { 
+        return this.portadorDeArmadura.claseDeArmadura()
     }
 }

@@ -1,4 +1,4 @@
-import { IPortadorArmadura } from "./Armadura";
+import { IPortadorArmadura } from "./IPortadorDeArmadura";
 import { ArmaduraDecorador } from "./ArmaduraDecorador";
 
 export class ArmaduraDePlacas extends ArmaduraDecorador{
@@ -6,7 +6,7 @@ export class ArmaduraDePlacas extends ArmaduraDecorador{
         super("armadura_de_placas", "armadura", portadorDeArmadura);
     }
 
-    claseDeArmadura(destreza: number): number { 
-        return 18 + destreza;
+    claseDeArmadura(): number { 
+        return 18 + this.portadorDeArmadura.getDestreza();
     }
 }
