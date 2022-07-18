@@ -1,16 +1,7 @@
 import { Inventario } from "../../Contenedor/Inventario";
 import { Personaje } from "../Personaje";
 
-export class Cantinero implements Personaje {
-    vidaMaxima: number
-    vidaActual: number
-    inventario: Inventario
-
-    constructor(vidaMaxima = 10){
-        this.vidaMaxima = vidaMaxima
-        this.vidaActual = vidaMaxima
-    }
-
+export class Cantinero extends Personaje {  
     getVidaMaxima(): number {
         return this.vidaMaxima
     }
