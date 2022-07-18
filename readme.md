@@ -1,12 +1,12 @@
 # NodeRPG
 Un juego RPG hecho con nodeJs y React para implementar diferentes patrones de diseño
 
-Para poder usar la aplicacion deberas correr los siguientes comandos:
-
-PREREQUISITOS:
+## Prerequisitos:
 * Tener instalado NodeJs - https://nodejs.org/es/
 
 ---
+
+## Para poder usar la aplicacion deberas correr los siguientes comandos:
 
 * primero deberas correr el backend
 ```js
