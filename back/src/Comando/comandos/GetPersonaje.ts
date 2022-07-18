@@ -1,3 +1,5 @@
+import { Espada } from '../../Objeto/objetos/Espada';
+import { PersonajeJugable } from '../../Personaje/personajes/Jugador';
 import IComando from '../IComando';
 
 class GetPersonaje implements IComando {
@@ -10,7 +12,8 @@ class GetPersonaje implements IComando {
     }
 
     ejecutar() {
-        return 'comando de personaje'
+        const objetosEncontrados = PersonajeJugable.getInstance().getInventario().getObjetos().map((objeto) => objeto.getNombre())
+        return `${objetosEncontrados.length ? objetosEncontrados : 'vacio'}`
     }
 }
 

@@ -8,7 +8,7 @@ export class Escenario {
 
     private constructor () {}
 
-    personaje: Personaje = new PersonajeJugable();
+    personaje: Personaje = PersonajeJugable.getInstance();
     lugar: ILugar = new Bar();
 
     public static getInstance(): Escenario {
@@ -31,6 +31,7 @@ export class Escenario {
             Personaje: ${this.getPersonaje().getNombre()}
             Lugar: ${this.getLugar().getNombre()}
             Personas: ${this.getLugar().getPersonajes().map((personaje) => personaje.getNombre())}
+            Objetos: ${this.getLugar().getObjetos().map((objeto) => objeto.getNombre())}
         `;
     }
 }

@@ -1,6 +1,6 @@
 import { Objeto } from "../Objeto/Objeto";
 
-export abstract class Contenedor{
+export abstract class Contenedor {
     objetos: Objeto[] = []
 
     puedeContener(contenedor: Contenedor): Boolean {
