@@ -6,6 +6,8 @@ Para poder usar la aplicacion deberas correr los siguientes comandos:
 PREREQUISITOS:
 * Tener instalado NodeJs - https://nodejs.org/es/
 
+---
+
 * primero deberas correr el backend
 ```js
 cd back && npm i && npm start
