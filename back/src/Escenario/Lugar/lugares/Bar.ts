@@ -1,4 +1,5 @@
 import { Objeto } from "../../../Objeto/Objeto";
+import { ArmaduraDeCuero } from "../../../Objeto/objetos/Armadura/ArmaduraDeCuero";
 import { Espada } from "../../../Objeto/objetos/Espada";
 import { Taza } from "../../../Objeto/objetos/Taza";
 import { Personaje } from "../../../Personaje/Personaje";
@@ -14,7 +15,8 @@ class Bar implements ILugar {
 
     objetos: Objeto[] = [
         new Taza(),
-        new Espada()
+        new Espada(),
+        new ArmaduraDeCuero()
     ];
 
     public static getInstance() {
