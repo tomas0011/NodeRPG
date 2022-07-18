@@ -3,7 +3,7 @@ import { ArmaduraDecorador } from "./ArmaduraDecorador";
 
 export class ArmaduraDePlacas extends ArmaduraDecorador{
     constructor(portadorDeArmadura: IPortadorArmadura = null){
-        super("armadura_de_placas", "armadura", portadorDeArmadura);
+        super("armadura de placas", "armadura", portadorDeArmadura);
     }
 
     claseDeArmadura(): number { 
