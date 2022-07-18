@@ -16,4 +16,4 @@ cd back && npm i && npm start
 cd app && npm i && npm start
 ```
 
-Esto puede demorar unos minutos
+Esto puede demorar unos minutos asi que tomatelo con calma.
