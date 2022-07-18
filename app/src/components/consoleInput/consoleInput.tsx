@@ -3,7 +3,8 @@
 export function ConsoleInput() {
     return (
       <div className="consoleInput">
-        <h1>input</h1>
+        <input type="text" />
+        <button>Enviar</button>
       </div>
     );
 }

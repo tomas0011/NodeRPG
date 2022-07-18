@@ -1,10 +1,10 @@
 // import './commandResponse.css';
 
-function CommandResponse() {
+function CommandResponse(params: { commandResponse: any }) {
     return (
-      <div className="CommandResponse">
-        <h1>HOLA MUNDO</h1>
-      </div>
+        <div className="CommandResponse">
+            <h1>{params.commandResponse.content}</h1>
+        </div>
     );
 }
 
