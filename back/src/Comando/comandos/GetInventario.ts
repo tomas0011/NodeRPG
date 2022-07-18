@@ -1,4 +1,4 @@
-import IComando from './IComando';
+import IComando from '../IComando';
 
 class GetInventario implements IComando {
     getKey() {

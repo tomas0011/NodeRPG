@@ -1,5 +1,5 @@
-import { Escenario } from "../Escenario";
-import IComando from './comandos/IComando';
+import { Escenario } from "../Escenario/Escenario";
+import IComando from './IComando';
 import {
     GetEscenario,
     GetHelp,
