@@ -4,11 +4,8 @@ import ILugar from "./Lugar/ILugar";
 import Bar from "./Lugar/lugares/Bar";
 
 export class Escenario {
-    private static escenario: Escenario | null = null
+    private static escenario: Escenario;
 
-    private constructor () {}
-
-    personaje: Personaje = PersonajeJugable.getInstance();
     lugar: ILugar = new Bar();
 
     public static getInstance(): Escenario {
@@ -18,17 +15,13 @@ export class Escenario {
         return Escenario.escenario
     }
 
-    private getPersonaje(): Personaje {
-        return this.personaje
-    }
-
-    private getLugar(): ILugar {
+    public getLugar(): ILugar {
         return this.lugar
     }
 
     public getEscenario(): string {
         return `
-            Personaje: ${this.getPersonaje().getNombre()}
+            Personaje: ${PersonajeJugable.getInstance().getNombre()}
             Lugar: ${this.getLugar().getNombre()}
             Personas: ${this.getLugar().getPersonajes().map((personaje) => personaje.getNombre())}
             Objetos: ${this.getLugar().getObjetos().map((objeto) => objeto.getNombre())}
