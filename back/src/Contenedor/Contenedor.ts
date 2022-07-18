@@ -1,6 +1,5 @@
 import { Objeto } from "../Objeto/Objeto";
 
-
 export abstract class Contenedor{
     objetos: Array<Objeto> = []
     puedeContenerUnContenedor: Boolean = false;
