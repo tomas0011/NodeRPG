@@ -1,7 +1,7 @@
 interface IComando {
     getKey(): string
     esComando(comando: string): boolean
-    ejecutar(): string
+    ejecutar(interactive: string): string
 }
 
 export default IComando;
