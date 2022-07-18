@@ -1,11 +1,29 @@
 // import './ConsoleInput.css';
 
-export function ConsoleInput() {
+import { useState } from "react";
+import { RequestManager } from "../../utils/RequestManager";
+
+export function ConsoleInput(params: { setCommandResponseAction: any }) {
+    const [inputValue, setInputValue] = useState('')
+
+    function handlerOnChange(event: any) {
+        setInputValue(event.target.value)
+    }
+
+    function responseTrigger(response: any) {
+        params.setCommandResponseAction(response)
+    }
+
+    function handlerOnSubmit(event: any) {
+        event.preventDefault()
+        RequestManager.getInstance().get(`/command?command=${inputValue}`, responseTrigger)
+        setInputValue('')
+    }
+
     return (
-      <div className="consoleInput">
-        <input type="text" />
-        <button>Enviar</button>
-      </div>
+      <form className="consoleInput" onSubmit={handlerOnSubmit}>
+        <input type="text" value={inputValue} onChange={handlerOnChange} />
+      </form>
     );
 }
 

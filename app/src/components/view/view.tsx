@@ -2,14 +2,17 @@
 
 import ConsoleOutput from "../consoleOutput/consoleOuput";
 import ConsoleInput from "../consoleInput/consoleInput";
+import { useState } from "react";
 
 function View() {
-  return (
-    <div className="View">
-      <ConsoleOutput/>
-      <ConsoleInput/>
-    </div>
-  );
+    const [commandResponseAction, setCommandResponseAction] = useState(null)
+
+    return (
+        <div className="View">
+            <ConsoleOutput commandResponseAction={commandResponseAction}/>
+            <ConsoleInput setCommandResponseAction={setCommandResponseAction}/>
+        </div>
+    );
 }
 
 export default View;
