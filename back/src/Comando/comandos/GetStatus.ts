@@ -13,7 +13,12 @@ class GetStatus implements IComando {
 
     ejecutar() {
         const objetosEncontrados = PersonajeJugable.getInstance().getInventario().getObjetos().map((objeto) => objeto.getNombre())
-        return `${objetosEncontrados.length ? objetosEncontrados : 'vacio'}`
+        return `
+            Nombre: ${PersonajeJugable.getInstance().getNombre()}
+            Clase de armadura: ${PersonajeJugable.getInstance().claseDeArmadura()}
+            Dado de golpe: ${PersonajeJugable.getInstance().dadoDeGolpe()}
+            Inventario: ${objetosEncontrados.length ? objetosEncontrados : 'vacio'}
+        `;
     }
 }
 

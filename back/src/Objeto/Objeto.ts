@@ -1,4 +1,4 @@
-export class Objeto{
+export abstract class Objeto{
     nombre: String;
     clase: String;
 
@@ -6,6 +6,8 @@ export class Objeto{
         this.nombre = nombre;
         this.clase = clase;
     }
+
+    abstract getModificacion(): any
 
     getNombre(){
         return this.nombre;
