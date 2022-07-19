@@ -1,13 +1,15 @@
-// import './commandResponse.css';
+import React from 'react';
+import './commandResponse.css';
 
 function CommandResponse(params: { commandResponse: any }) {
     return (
-        <div className="CommandResponse">
-            <hr />
-            <p>{params.commandResponse.command}</p>
-            <p>{params.commandResponse.content}</p>
-            <hr />
-        </div>
+        <React.Fragment>
+            <div className='CommandResponse'>
+                <p>{params.commandResponse.command}</p>
+                <p>{params.commandResponse.content}</p>
+            </div>
+        </React.Fragment>
+        
     );
 }
 

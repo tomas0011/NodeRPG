@@ -1,14 +1,60 @@
-// import './consoleOutput.css';
+import './consoleOutput.css';
 
 import { useEffect, useState } from "react";
 import CommandResponse from "../commandResponse/commandResponse";
 
 function ConsoleOutput(params: { commandResponseAction: any }) {
     const [commandResponses, setCommandResponses] = useState([{
-        content: 'burned example'
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
     },{
-        content: 'burned example 2'
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
+    },{
+        command: 'Bienvenido',
+        content: 'a NodeRPG'
     }])
+
+
 
     useEffect(() => {
         console.log(params.commandResponseAction)
@@ -24,8 +70,12 @@ function ConsoleOutput(params: { commandResponseAction: any }) {
         }
     }, [params.commandResponseAction])
 
+    function handlerOnChange(e: any){
+        console.log(e.target)
+    }
+
     return (
-      <div className="ConsoleOutput">
+      <div className="ConsoleOutput" onChange={ handlerOnChange} >
         {commandResponses.map((commandResponse) => {
             return <CommandResponse commandResponse={commandResponse}/>
         })}
