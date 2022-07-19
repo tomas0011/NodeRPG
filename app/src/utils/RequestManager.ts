@@ -11,12 +11,15 @@ export class RequestManager {
         return RequestManager.requestManager
     }
 
-    public async get(path: string, responseTrigger: any): Promise<void> {
+    public async getCommand(command: string, responseTrigger: any): Promise<void> {
         try {
-            const { data } = await axios.get(`${this.host}${path}`)
+            const { data } = await axios.get(`${this.host}/command?command=${command}`)
             responseTrigger(data)
         } catch (error) {
-            console.log(error)
+            responseTrigger({
+                command,
+                content: 'Comando no encontrado'
+            })
         }
     }
 }

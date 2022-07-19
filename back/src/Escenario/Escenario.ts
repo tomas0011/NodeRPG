@@ -6,7 +6,7 @@ import Bar from "./Lugar/lugares/Bar";
 export class Escenario {
     private static escenario: Escenario;
 
-    lugar: ILugar = new Bar();
+    private lugar: ILugar = new Bar();
 
     public static getInstance(): Escenario {
         if (!Escenario.escenario) {
@@ -17,14 +17,5 @@ export class Escenario {
 
     public getLugar(): ILugar {
         return this.lugar
-    }
-
-    public getEscenario(): string {
-        return `
-            Personaje: ${PersonajeJugable.getInstance().getNombre()}
-            Lugar: ${this.getLugar().getNombre()}
-            Personas: ${this.getLugar().getPersonajes().map((personaje) => personaje.getNombre())}
-            Objetos: ${this.getLugar().getObjetos().map((objeto) => objeto.getNombre())}
-        `;
     }
 }

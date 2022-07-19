@@ -1,6 +1,5 @@
 import { Escenario } from '../../Escenario/Escenario';
 import { Objeto } from '../../Objeto/Objeto';
-import { Espada } from '../../Objeto/objetos/Espada';
 import { PersonajeJugable } from '../../Personaje/personajes/Jugador';
 import IComando from '../IComando';
 
@@ -21,7 +20,7 @@ class TomarObjeto implements IComando {
                 return 'No se encuentra el objeto'
             }
             PersonajeJugable.getInstance().getInventario().agregarObjeto(objetoEncontrado)
-            return `Tomaste un/a ${objetoEncontrado.getNombre()}`
+            return `Tomaste un/a "${objetoEncontrado.getNombre()}"`
         } catch (error) {
             console.log(error)
         }
