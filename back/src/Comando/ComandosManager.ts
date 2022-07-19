@@ -1,6 +1,7 @@
 import { Escenario } from "../Escenario/Escenario";
 import IComando from './IComando';
 import {
+    EquiparObjeto,
     GetEscenario,
     GetHelp,
     GetStatus,
@@ -15,7 +16,8 @@ class ComandoManager {
         new GetEscenario,
         new GetHelp,
         new GetStatus,
-        new TomarObjeto
+        new TomarObjeto,
+        new EquiparObjeto
     ]
     
     constructor() {}
@@ -32,7 +34,7 @@ class ComandoManager {
         if (comandoFound) {
             return comandoFound
         } else {
-            throw new Error('comando no encontrado');
+            console.error('getComando: comando no encontrado');
         }
     }
 

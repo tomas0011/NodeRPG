@@ -22,6 +22,7 @@ export class Escenario {
     public getEscenario(): string {
         return `
             Personaje: ${PersonajeJugable.getInstance().getNombre()}
+            Clase de armadura: ${PersonajeJugable.getInstance().claseDeArmadura()}
             Lugar: ${this.getLugar().getNombre()}
             Personas: ${this.getLugar().getPersonajes().map((personaje) => personaje.getNombre())}
             Objetos: ${this.getLugar().getObjetos().map((objeto) => objeto.getNombre())}

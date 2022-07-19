@@ -1,4 +1,5 @@
 import { Inventario } from "../../Contenedor/Inventario";
+import { ArmaduraDecorador } from "../../Objeto/objetos/Armadura/ArmaduraDecorador";
 import { Personaje } from "../Personaje";
 
 export class PersonajeJugable extends Personaje {
@@ -13,6 +14,10 @@ export class PersonajeJugable extends Personaje {
 
     getNombre(): string {
         return 'Tomas'
+    }
+
+    equiparArmadura(armadura: any): void {
+        PersonajeJugable.personaje = new armadura(PersonajeJugable.personaje)
     }
 
     getVidaMaxima(): number {

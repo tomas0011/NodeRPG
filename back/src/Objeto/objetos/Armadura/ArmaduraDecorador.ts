@@ -5,7 +5,7 @@ export class ArmaduraDecorador extends Objeto implements IPortadorArmadura {
     portadorDeArmadura: IPortadorArmadura ;
     destreza: number;
     
-    constructor(nombre: string, clase: string,portadorDeArmadura: IPortadorArmadura){
+    constructor(nombre: string, clase: string, portadorDeArmadura: IPortadorArmadura){
         super(nombre,clase);
         this.portadorDeArmadura = portadorDeArmadura;
     }

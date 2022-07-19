@@ -3,15 +3,14 @@
 import { useEffect, useState } from "react";
 import CommandResponse from "../commandResponse/commandResponse";
 
-function ConsoleOutput(params: { commandResponseAction: any }) {
+function ConsoleOutput(params: { commandResponseAction: any, setCommandResponseAction: any }) {
     const [commandResponses, setCommandResponses] = useState([{
-        content: 'burned example'
-    },{
-        content: 'burned example 2'
+        content: `
+            Bienvenido
+        `
     }])
 
     useEffect(() => {
-        console.log(params.commandResponseAction)
         if(params.commandResponseAction) {
             if (params.commandResponseAction.command === 'clear') {
                 setCommandResponses([])
@@ -27,7 +26,7 @@ function ConsoleOutput(params: { commandResponseAction: any }) {
     return (
       <div className="ConsoleOutput">
         {commandResponses.map((commandResponse) => {
-            return <CommandResponse commandResponse={commandResponse}/>
+            return <CommandResponse commandResponse={commandResponse} setCommandResponseAction={params.setCommandResponseAction}/>
         })}
       </div>
     );

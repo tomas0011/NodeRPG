@@ -9,7 +9,7 @@ function View() {
 
     return (
         <div className="View">
-            <ConsoleOutput commandResponseAction={commandResponseAction}/>
+            <ConsoleOutput commandResponseAction={commandResponseAction} setCommandResponseAction={setCommandResponseAction}/>
             <ConsoleInput setCommandResponseAction={setCommandResponseAction}/>
         </div>
     );
