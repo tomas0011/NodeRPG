@@ -1,23 +1,23 @@
 import { Inventario } from "../../Contenedor/Inventario";
-import { ArmaduraDecorador } from "../../Objeto/objetos/Armadura/ArmaduraDecorador";
 import { Personaje } from "../Personaje";
 
 export class PersonajeJugable extends Personaje {
-    private static personaje: PersonajeJugable
+    private static personaje: Personaje
     
-    public static getInstance(): PersonajeJugable {
+    public static getInstance(): Personaje {
         if (!PersonajeJugable.personaje) {
             PersonajeJugable.personaje = new PersonajeJugable(10);
         }
         return PersonajeJugable.personaje
     }
 
-    getNombre(): string {
-        return 'Tomas'
+    public static setInstance(newConstructor: any): Personaje {
+        PersonajeJugable.personaje = new newConstructor(PersonajeJugable.getInstance());
+        return PersonajeJugable.personaje
     }
 
-    equiparArmadura(armadura: any): void {
-        PersonajeJugable.personaje = new armadura(PersonajeJugable.personaje)
+    getNombre(): string {
+        return 'Tomas'
     }
 
     getVidaMaxima(): number {

@@ -6,7 +6,7 @@ import Bar from "./Lugar/lugares/Bar";
 export class Escenario {
     private static escenario: Escenario;
 
-    lugar: ILugar = new Bar();
+    private lugar: ILugar = new Bar();
 
     public static getInstance(): Escenario {
         if (!Escenario.escenario) {

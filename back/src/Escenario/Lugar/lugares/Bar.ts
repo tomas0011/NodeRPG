@@ -1,5 +1,5 @@
 import { Objeto } from "../../../Objeto/Objeto";
-import { ArmaduraDeCuero } from "../../../Objeto/objetos/Armadura/ArmaduraDeCuero";
+import { ArmaduraDeCuero } from "../../../Objeto/objetos/ArmaduraDeCuero";
 import { Espada } from "../../../Objeto/objetos/Espada";
 import { Taza } from "../../../Objeto/objetos/Taza";
 import { Personaje } from "../../../Personaje/Personaje";

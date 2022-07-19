@@ -13,8 +13,6 @@ class GetEscenario implements IComando {
 
     ejecutar() {
         return `
-            Personaje: ${PersonajeJugable.getInstance().getNombre()}
-            Clase de armadura: ${PersonajeJugable.getInstance().claseDeArmadura()}
             Lugar: ${Escenario.getInstance().getLugar().getNombre()}
             Personas: ${Escenario.getInstance().getLugar().getPersonajes().map((personaje) => personaje.getNombre())}
             Objetos: ${Escenario.getInstance().getLugar().getObjetos().map((objeto) => objeto.getNombre())}

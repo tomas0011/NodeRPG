@@ -1,7 +1,7 @@
 import { Inventario } from "../Contenedor/Inventario";
-import { IPortadorArmadura } from "../Objeto/objetos/Armadura/IPortadorDeArmadura";
+import IPersonaje from "./IPersonaje";
 
-export class Personaje implements IPortadorArmadura{
+export class Personaje implements IPersonaje {
     vidaMaxima: number
     vidaActual: number
     inventario: Inventario
@@ -36,6 +36,10 @@ export class Personaje implements IPortadorArmadura{
     recibirDaño(daño: number): number {
         this.vidaActual -= daño;
         return daño
+    }
+
+    dadoDeGolpe(): number {
+        return 4
     }
 
     getNombre(){
