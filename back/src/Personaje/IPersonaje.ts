@@ -1,6 +1,6 @@
 import { Inventario } from "../Contenedor/Inventario";
 
-interface IPersonaje {
+export default interface IPersonaje {
     vidaMaxima: number
     vidaActual: number
     inventario: Inventario
@@ -14,5 +14,3 @@ interface IPersonaje {
     dadoDeGolpe(): number
     getNombre(): string
 }
-
-export default IPersonaje
