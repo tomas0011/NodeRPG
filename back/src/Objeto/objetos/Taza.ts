@@ -4,4 +4,6 @@ export class Taza extends Objeto {
     constructor() {
         super('taza', 'objeto')
     }
+
+    getModificacion() {}
 } 

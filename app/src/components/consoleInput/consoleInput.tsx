@@ -25,7 +25,7 @@ export function ConsoleInput(params: { setCommandResponseAction: any }) {
                 content: ''
             })
         } else {
-            RequestManager.getInstance().get(`/command?command=${inputValue}`, responseTrigger)
+            RequestManager.getInstance().getCommand(inputValue, responseTrigger)
         }
         setInputValue('')
     }

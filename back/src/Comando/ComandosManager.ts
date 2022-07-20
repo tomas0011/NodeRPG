@@ -1,6 +1,7 @@
 import { Escenario } from "../Escenario/Escenario";
 import IComando from './IComando';
 import {
+    EquiparObjeto,
     GetEscenario,
     GetHelp,
     GetStatus,
@@ -15,7 +16,8 @@ class ComandoManager {
         new GetEscenario,
         new GetHelp,
         new GetStatus,
-        new TomarObjeto
+        new TomarObjeto,
+        new EquiparObjeto
     ]
     
     constructor() {}
@@ -32,15 +34,15 @@ class ComandoManager {
         if (comandoFound) {
             return comandoFound
         } else {
-            throw new Error('comando no encontrado');
+            console.error('getComando: comando no encontrado');
         }
     }
 
-    public ejecutarComando(comando: string) {
-        const [mainCommand, interactive] = comando.split(' ')
-        const comandoFound: IComando = this.getComando(mainCommand)
+    public ejecutarComando(comandoRecibido: string) {
+        const [comando, agente] = comandoRecibido.split(':').map((fragmento: string) => fragmento.trim())
+        const comandoFound: IComando = this.getComando(comando)
         if (comandoFound) {
-            return comandoFound.ejecutar(interactive)
+            return comandoFound.ejecutar(agente)
         } else {
             throw new Error('Comando no encontrado')
         };

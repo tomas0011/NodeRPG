@@ -3,14 +3,14 @@ import './consoleOutput.css';
 import { useEffect, useState } from "react";
 import CommandResponse from "../commandResponse/commandResponse";
 
-function ConsoleOutput(params: { commandResponseAction: any }) {
+function ConsoleOutput(params: { commandResponseAction: any, setCommandResponseAction: any }) {
     const [commandResponses, setCommandResponses] = useState([{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
+        content: `
+            Bienvenido
+        `
     }])
 
     useEffect(() => {
-        console.log(params.commandResponseAction)
         if(params.commandResponseAction) {
             if (params.commandResponseAction.command === 'clear') {
                 setCommandResponses([])
@@ -30,7 +30,7 @@ function ConsoleOutput(params: { commandResponseAction: any }) {
     return (
       <div className="ConsoleOutput" onChange={handlerOnChange} >
         {commandResponses.map((commandResponse) => {
-            return <CommandResponse commandResponse={commandResponse}/>
+            return <CommandResponse commandResponse={commandResponse} setCommandResponseAction={params.setCommandResponseAction}/>
         })}
       </div>
     );
