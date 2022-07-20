@@ -7,7 +7,6 @@
     width: 95%;
     margin-left: 2.5%;
 }
-
 .CommandResponse > p{
     padding-top: 5px;
     padding-bottom: 5px;
@@ -17,6 +16,5 @@
     font-family: monospace;
     font-size: 15px;
     color:#fff;
-    padding-left: 10px;
-    
+    padding-left: 10px;   
 }

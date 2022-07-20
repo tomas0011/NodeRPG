@@ -7,54 +7,7 @@ function ConsoleOutput(params: { commandResponseAction: any }) {
     const [commandResponses, setCommandResponses] = useState([{
         command: 'Bienvenido',
         content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
-    },{
-        command: 'Bienvenido',
-        content: 'a NodeRPG'
     }])
-
-
 
     useEffect(() => {
         console.log(params.commandResponseAction)
@@ -75,7 +28,7 @@ function ConsoleOutput(params: { commandResponseAction: any }) {
     }
 
     return (
-      <div className="ConsoleOutput" onChange={ handlerOnChange} >
+      <div className="ConsoleOutput" onChange={handlerOnChange} >
         {commandResponses.map((commandResponse) => {
             return <CommandResponse commandResponse={commandResponse}/>
         })}
