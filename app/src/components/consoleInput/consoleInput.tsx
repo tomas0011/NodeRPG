@@ -1,4 +1,4 @@
-import './ConsoleInput.css';
+import './consoleInput.css';
 
 import { useState } from "react";
 import { RequestManager } from "../../utils/RequestManager";
