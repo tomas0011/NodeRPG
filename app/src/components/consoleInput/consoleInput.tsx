@@ -1,4 +1,4 @@
-// import './ConsoleInput.css';
+import './consoleInput.css';
 
 import { useState } from "react";
 import { RequestManager } from "../../utils/RequestManager";
@@ -32,7 +32,7 @@ export function ConsoleInput(params: { setCommandResponseAction: any }) {
 
     return (
       <form className="consoleInput" onSubmit={handlerOnSubmit}>
-        <input type="text" value={inputValue} onChange={handlerOnChange} />
+        <input type="text" value={inputValue} onChange={handlerOnChange} placeholder="/Help para obtener los comandos..." />
       </form>
     );
 }

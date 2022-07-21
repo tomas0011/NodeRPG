@@ -1,4 +1,4 @@
-// import './view.css';
+import './view.css';
 
 import ConsoleOutput from "../consoleOutput/consoleOuput";
 import ConsoleInput from "../consoleInput/consoleInput";

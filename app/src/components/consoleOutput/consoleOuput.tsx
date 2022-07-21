@@ -1,4 +1,4 @@
-// import './consoleOutput.css';
+import './consoleOutput.css';
 
 import { useEffect, useState } from "react";
 import CommandResponse from "../commandResponse/commandResponse";
@@ -23,8 +23,12 @@ function ConsoleOutput(params: { commandResponseAction: any, setCommandResponseA
         }
     }, [params.commandResponseAction])
 
+    function handlerOnChange(e: any){
+        console.log(e.target)
+    }
+
     return (
-      <div className="ConsoleOutput">
+      <div className="ConsoleOutput" onChange={handlerOnChange} >
         {commandResponses.map((commandResponse) => {
             return <CommandResponse commandResponse={commandResponse} setCommandResponseAction={params.setCommandResponseAction}/>
         })}

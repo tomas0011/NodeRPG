@@ -1,4 +1,4 @@
-// import './commandResponse.css';
+import './commandResponse.css';
 import { RequestManager } from "../../utils/RequestManager";
 
 function CommandResponse(params: { commandResponse: any, setCommandResponseAction: any }) {
@@ -14,12 +14,10 @@ function CommandResponse(params: { commandResponse: any, setCommandResponseActio
     }
 
     return (
-        <div className="CommandResponse">
-            <hr />
-            <p onClick={handlerOnClick}>{params.commandResponse.command}</p>
+        <div className='CommandResponse'>
+            <p>{params.commandResponse.command}</p>
             <p>{params.commandResponse.content}</p>
-            <hr />
-        </div>
+        </div>        
     );
 }
 
