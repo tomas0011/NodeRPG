@@ -15,8 +15,8 @@ function ConsoleOutput(params: { commandResponseAction: any, setCommandResponseA
             if (params.commandResponseAction.command === 'clear') {
                 setCommandResponses([])
             } else {
-                setCommandResponses([
-                    ...commandResponses,
+                setCommandResponses((prev) => [
+                    ...prev,
                     params.commandResponseAction
                 ])
             }
