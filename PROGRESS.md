@@ -28,7 +28,7 @@ Testeadores su veredicto.
 ## Estado actual
 
 - **Fecha de última actualización**: 2026-06-20
-- **Foco actual**: **Fase 3 EN PROGRESO** — 3a ✅, 3b ✅, 3c ✅. Sigue **3d** (tiendas hub+en-run) o **3f** (salas/`mover`).
+- **Foco actual**: **Fase 3 EN PROGRESO** — 3a/3b/3c/3d ✅ (loop + economía + meta-progresión). Sigue **3f** (salas/`mover`) o **3e** (consumibles).
 - **Rama de trabajo**: `feat/new-tui-rpg` (el usuario partió de aquí; al terminar se mergea a `develop`).
 - **Bloqueos abiertos**: ninguno (la credencial de Atlas quedó resuelta por el usuario; conexión OK).
 - **Próximo paso global**: arrancar **Fase 3** (jugabilidad roguelike). Sugerido empezar por **3a** (`atacar` + Strategy de armas, solo depende de F1).
@@ -117,7 +117,7 @@ Testeadores su veredicto.
 | 3a | `atacar` + Strategy de armas (Espada/Arco/Martillo, puños por defecto) | F1 | **HECHO ✅** |
 | 3b | Ciclo run: `crear`/morir/`abandonar` (bankeo + archivado + delete) | F2 | **HECHO ✅** |
 | 3c | Monedas: oro (run) + plata (perfil) | 3b | **HECHO ✅** |
-| 3d | Tiendas hub (plata) + en-run (oro), comando `comprar` | 3c |
+| 3d | Tiendas hub (plata) + en-run (oro), comando `comprar` | 3c | **HECHO ✅** |
 | 3e | Consumibles + Strategy de efectos (`usar`, `IEfecto`) | 3a |
 | 3f | Más salas/enemigos/NPCs + `mover`, catálogos/pools | F2 (`LugarFactory`) |
 | 3g | Loot encontrable (tablas de botín) | 3f |
@@ -164,6 +164,9 @@ Testeadores su veredicto.
   La credencial de Atlas la corrigió el usuario.
 - **2026-06-20** — **F1 HECHA ✅**: `GameState`/`GameEngine`/`CommandResult`, des-singletonizado, equipo por ids,
   multi-sesión. Verificada por el Orquestador (build + 13/13 tests + lint + servidor + grep sin globales).
+- **2026-06-20** — **F3d ✅** (tiendas + meta-progresión): catálogos (mejoras hub/plata + equipo run/oro), `tienda`/`comprar`,
+  `CrearPersonaje` aplica `profile.mejoras`. build+lint+73 tests; smoke Atlas verde (2 runs→plata 20→comprar vida_extra→nueva
+  run vida inicial 15). Salas-tienda físicas quedan para 3f; en-run vende equipo (no consumibles, eso es 3e).
 - **2026-06-20** — **F3c ✅** (monedas oro/plata): botín del enemigo (`getRecompensa`), oro en la run / plata al perfil.
   build+lint+52 tests; smoke Atlas verde (matar Cantinero→oro 15 en status→abandonar→plata 10 bankeada, oro perdido).
   Nuevo comando `perfil` (hub) muestra la plata. Comando inválido ya devuelve `{"error":"<msg>"}`.

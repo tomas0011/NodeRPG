@@ -11,7 +11,9 @@ import IComandoSesion from '../IComandoSesion';
  * repositorios: la persistencia la realiza el ciclo de sesión que inyectó el
  * iniciador.
  *
- * Aplicar `profile.mejoras` a los stats iniciales es 3d → fuera de alcance aquí.
+ * Meta-progresión (3d): `iniciarRun` aplica `profile.mejoras` a los stats e
+ * inventario iniciales del personaje (vía `crearGameState`/`aplicarMejoras`), de
+ * modo que las mejoras compradas en el hub se hacen efectivas aquí.
  */
 export default class CrearPersonaje implements IComandoSesion {
     getKey(): string {

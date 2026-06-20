@@ -3,12 +3,14 @@ import IComandoSesion from "../Comando/IComandoSesion";
 import {
     Abandonar,
     Atacar,
+    Comprar,
     CrearPersonaje,
     EquiparObjeto,
     GetEscenario,
     GetHelp,
     GetStatus,
     Perfil,
+    Tienda,
     TomarObjeto
 } from "../Comando";
 import CommandResult from "./CommandResult";
@@ -50,7 +52,9 @@ export default class GameEngine {
         this.comandosSesion = [
             new CrearPersonaje(),
             new Abandonar(),
-            new Perfil()
+            new Perfil(),
+            new Tienda(),
+            new Comprar()
         ];
     }
 

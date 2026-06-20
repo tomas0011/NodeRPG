@@ -18,6 +18,7 @@ export default interface IPersonaje {
     getDestreza(): number
     getOro(): number
     ganarOro(cantidad: number): number
+    gastarOro(cantidad: number): boolean
     getRecompensa(): Recompensa
     claseDeArmadura(): number
     getVidaMaxima(): number

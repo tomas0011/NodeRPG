@@ -198,7 +198,9 @@ export default class SessionManager {
      */
     private iniciarRun(profile: ProfileDTO): GameState {
         const runId = SessionManager.nuevoSessionId();
-        const state = crearGameState(profile.sessionId, runId);
+        // Meta-progresión (3d): las mejoras compradas en el hub se aplican a los
+        // stats/inventario iniciales del personaje al crear la run.
+        const state = crearGameState(profile.sessionId, runId, undefined, profile.mejoras);
         profile.runActivaId = runId;
         this.cacheStates.set(runId, state);
         return state;

@@ -34,6 +34,19 @@ export class Personaje implements IPersonaje {
     }
 
     /**
+     * Gasta `cantidad` de oro (moneda de la run) si hay saldo suficiente.
+     * Devuelve `true` y descuenta si pudo pagar; `false` y no cambia nada si no.
+     * Ignora cantidades no positivas (no es un camino de gasto válido).
+     */
+    gastarOro(cantidad: number): boolean {
+        if (cantidad <= 0 || this.oro < cantidad) {
+            return false;
+        }
+        this.oro -= cantidad;
+        return true;
+    }
+
+    /**
      * Botín de monedas que este personaje otorga al ser derrotado. Default sin
      * recompensa; los enemigos lo sobrescriben con sus valores (patrón: el botín
      * es comportamiento del enemigo, no un número fijo en `Atacar`). Determinista,

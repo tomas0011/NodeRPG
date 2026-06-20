@@ -25,6 +25,10 @@ export default class PersonajeDecorador implements IPersonaje {
         return this.portadorDeArmadura.ganarOro(cantidad);
     }
 
+    gastarOro(cantidad: number): boolean {
+        return this.portadorDeArmadura.gastarOro(cantidad);
+    }
+
     getRecompensa(): Recompensa {
         return this.portadorDeArmadura.getRecompensa();
     }
