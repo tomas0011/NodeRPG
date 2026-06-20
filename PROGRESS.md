@@ -28,7 +28,7 @@ Testeadores su veredicto.
 ## Estado actual
 
 - **Fecha de última actualización**: 2026-06-20
-- **Foco actual**: **Fase 3 HECHA ✅ (10/10)**. Falta solo **F4 (despliegue)** — requiere decisiones del usuario (host backend, Vercel).
+- **Foco actual**: **F4 backend-deploy ✅** (Render: PORT/CORS/health/Dockerfile, verificado). Falta la **UI nueva** (hub web + TUI) para cerrar F4.
 - **Rama de trabajo**: `feat/new-tui-rpg` (el usuario partió de aquí; al terminar se mergea a `develop`).
 - **Bloqueos abiertos**: ninguno (la credencial de Atlas quedó resuelta por el usuario; conexión OK).
 - **Próximo paso global**: **F4 (despliegue)** — front en Vercel + backend persistente (Render/Railway/Fly). Necesita: elegir host del backend y proyecto Vercel.
@@ -51,7 +51,7 @@ Testeadores su veredicto.
 | F1 | Desacoplar Singletons y HTTP (GameState, GameEngine, equipo por ids, CommandResult) | HECHO ✅ | F0 | — |
 | F2 | Sesiones + persistencia MongoDB Atlas (perfil/run/histórico, repos, mapper) | HECHO ✅ | F1 | — |
 | F3 | Jugabilidad roguelike (3a–3j, ver detalle) | HECHO ✅ (10/10) | F1/F2 | — |
-| F4 | Despliegue (Vercel + backend persistente) | PENDIENTE | F2 | — |
+| F4 | Despliegue (Vercel + backend persistente) | EN PROGRESO | F2 | Backend-deploy (Render) ✅; falta UI (hub+TUI) + Vercel |
 
 > El harness (WORKFLOW.md, PROGRESS.md, PLAN.md, skills) ya está creado — fuera de esta tabla de fases.
 
@@ -158,6 +158,12 @@ Testeadores su veredicto.
 ---
 
 ## Bitácora (lo más reciente arriba)
+
+- **2026-06-20** — **F4 backend-deploy ✅** (Render): `index.ts` con `PORT`/`CORS_ORIGIN` por env (fallback dev) + `/health`
+  (refleja estado mongoose, no tumba si Mongo cae); `Dockerfile` multi-stage Node 20-alpine, `.dockerignore`, `render.yaml`
+  (runtime Docker, healthcheck `/health`, env vars `sync:false`), `Procfile`, `.env.example` extendido, script `start:prod`.
+  Verificado: build+lint, server en PORT custom, `/health` 200, CORS permite Vercel y bloquea ajeno, sin secretos versionados.
+  **Pendiente F4**: UI nueva (hub web + TUI con autocompletado, `GameContext`, `RequestManager` por `REACT_APP_API_URL`) + deploy Vercel.
 
 - **2026-06-20** — **F2 HECHA ✅**: persistencia (repos InMemory+Mongo, mapper, sesiones, caché write-through). build +
   23/23 tests + lint verdes; **smoke contra Atlas real PASA** (persiste tras reinicio, perfil sobrevive a borrar run).
