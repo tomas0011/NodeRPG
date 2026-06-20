@@ -28,7 +28,7 @@ Testeadores su veredicto.
 ## Estado actual
 
 - **Fecha de última actualización**: 2026-06-20
-- **Foco actual**: **F4 backend-deploy ✅** (Render: PORT/CORS/health/Dockerfile, verificado). Falta la **UI nueva** (hub web + TUI) para cerrar F4.
+- **Foco actual**: **F4** — backend-deploy (Render) ✅ + **config Vercel** ✅ (`RequestManager` por `REACT_APP_API_URL`, `vercel.json`, `.env.example`). Despliega la **consola actual**; la **UI nueva** (hub web + TUI) sigue pendiente.
 - **Rama de trabajo**: `feat/new-tui-rpg` (el usuario partió de aquí; al terminar se mergea a `develop`).
 - **Bloqueos abiertos**: ninguno (la credencial de Atlas quedó resuelta por el usuario; conexión OK).
 - **Próximo paso global**: **F4 (despliegue)** — front en Vercel + backend persistente (Render/Railway/Fly). Necesita: elegir host del backend y proyecto Vercel.
@@ -163,7 +163,11 @@ Testeadores su veredicto.
   (refleja estado mongoose, no tumba si Mongo cae); `Dockerfile` multi-stage Node 20-alpine, `.dockerignore`, `render.yaml`
   (runtime Docker, healthcheck `/health`, env vars `sync:false`), `Procfile`, `.env.example` extendido, script `start:prod`.
   Verificado: build+lint, server en PORT custom, `/health` 200, CORS permite Vercel y bloquea ajeno, sin secretos versionados.
-  **Pendiente F4**: UI nueva (hub web + TUI con autocompletado, `GameContext`, `RequestManager` por `REACT_APP_API_URL`) + deploy Vercel.
+  **Pendiente F4**: UI nueva (hub web + TUI con autocompletado, `GameContext`).
+- **2026-06-20** — **F4 config Vercel ✅**: `app/src/utils/RequestManager.ts` usa `process.env.REACT_APP_API_URL` (fallback localhost),
+  `app/vercel.json` (CRA, SPA rewrite), `app/.env.example` (REACT_APP_API_URL). Build de `app` ✅. Despliega la **consola actual**
+  (funcional vía comandos: `crear`/`mover`/`atacar`/…), NO la UI hub/TUI (que aún no existe). Deploy Vercel: Root Directory `app`,
+  env `REACT_APP_API_URL`=URL de Render; luego setear `CORS_ORIGIN` del backend = URL de Vercel y redeploy del backend.
 
 - **2026-06-20** — **F2 HECHA ✅**: persistencia (repos InMemory+Mongo, mapper, sesiones, caché write-through). build +
   23/23 tests + lint verdes; **smoke contra Atlas real PASA** (persiste tras reinicio, perfil sobrevive a borrar run).
