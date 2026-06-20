@@ -2,7 +2,10 @@ import axios from 'axios';
 
 export class RequestManager {
     private static requestManager: RequestManager | null = null
-    private host = 'http://localhost:3001';
+    // URL del backend por variable de entorno (CRA inyecta REACT_APP_* en build).
+    // En Vercel se setea REACT_APP_API_URL = URL del backend en Render; en dev local
+    // cae a localhost:3001.
+    private host = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
     public static getInstance(): RequestManager {
         if (!RequestManager.requestManager) {
