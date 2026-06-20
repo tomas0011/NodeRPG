@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import ComandoManager from './src/Comando/ComandosManager';
 
@@ -7,16 +7,20 @@ const port = 3001;
 
 app.use(cors())
 
-app.use((req: Request, res: Response, next ) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   console.log('URL: ', req.url)
   next()
 })
 
 app.get('/command', (req, res) => {
   try {
-    const content = ComandoManager.getInstance().ejecutarComando(req.query.command)
+    const command = req.query.command
+    if (typeof command !== 'string') {
+      throw new Error('Comando inválido')
+    }
+    const content = ComandoManager.getInstance().ejecutarComando(command)
     return res.status(200).send({
-      command: req.query.command,
+      command,
       content
     });
   } catch (error) {

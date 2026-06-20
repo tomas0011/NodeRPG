@@ -11,7 +11,7 @@ class EquiparObjeto implements IComando {
         return comando === this.getKey()
     }
 
-    ejecutar(nombreDeObjeto: string) {
+    ejecutar(nombreDeObjeto: string): string {
         try {
             const objetoEncontrado = PersonajeJugable.getInstance().getInventario().getObjetos().find((objeto: Objeto) => objeto.getNombre() === nombreDeObjeto)
             if (!objetoEncontrado) {
@@ -25,6 +25,7 @@ class EquiparObjeto implements IComando {
             return `Te Equipaste un/a "${objetoEncontrado.getNombre()}"`
         } catch (error) {
             console.log(error)
+            return 'No se pudo equipar el objeto'
         }
     }
 }

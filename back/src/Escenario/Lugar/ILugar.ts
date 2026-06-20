@@ -5,6 +5,6 @@ interface ILugar {
     getNombre(): string
     getPersonajes(): Personaje[]
     getObjetos(): Objeto[]
-};
+}
 
 export default ILugar;

@@ -1,8 +1,8 @@
 export abstract class Objeto{
-    nombre: String;
-    clase: String;
+    nombre: string;
+    clase: string;
 
-    constructor(nombre: String, clase: String){
+    constructor(nombre: string, clase: string){
         this.nombre = nombre;
         this.clase = clase;
     }

@@ -29,24 +29,25 @@ class ComandoManager {
         return ComandoManager.instance
     }
 
-    private getComando(comando: string): IComando {
-        const comandoFound: IComando = this.comandos.find((comandoParaEncontrar: IComando) => comandoParaEncontrar.esComando(comando))
+    private getComando(comando: string): IComando | undefined {
+        const comandoFound = this.comandos.find((comandoParaEncontrar: IComando) => comandoParaEncontrar.esComando(comando))
         if (comandoFound) {
             return comandoFound
         } else {
             console.error('getComando: comando no encontrado');
+            return undefined
         }
     }
 
     public ejecutarComando(comandoRecibido: string) {
         const [comando, agente] = comandoRecibido.split(':').map((fragmento: string) => fragmento.trim())
-        const comandoFound: IComando = this.getComando(comando)
+        const comandoFound = this.getComando(comando)
         if (comandoFound) {
             return comandoFound.ejecutar(agente)
         } else {
             throw new Error('Comando no encontrado')
-        };
-    };
+        }
+    }
 }
 
 export default ComandoManager

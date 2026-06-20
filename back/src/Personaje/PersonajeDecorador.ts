@@ -3,10 +3,10 @@ import IPersonaje from "./IPersonaje";
 
 export default class PersonajeDecorador implements IPersonaje {
     portadorDeArmadura: IPersonaje ;
-    destreza: number;
-    vidaMaxima: number;
-    vidaActual: number;
-    inventario: Inventario;
+    destreza!: number;
+    vidaMaxima!: number;
+    vidaActual!: number;
+    inventario!: Inventario;
     
     constructor(portadorDeArmadura: IPersonaje){
         this.portadorDeArmadura = portadorDeArmadura;
