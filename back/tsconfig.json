@@ -2,10 +2,13 @@
     "compilerOptions": {
       "module": "commonjs",
       "esModuleInterop": true,
-      "target": "es6",
+      "target": "es2020",
       "moduleResolution": "node",
       "sourceMap": true,
-      "outDir": "dist"
+      "outDir": "dist",
+      "strict": true,
+      "skipLibCheck": true
     },
-    "lib": ["es2015"]
+    "lib": ["es2020"],
+    "exclude": ["node_modules", "dist", "tests", "**/*.test.ts"]
 }

@@ -3,9 +3,9 @@ import { Objeto } from "../Objeto/Objeto";
 export abstract class Contenedor {
     objetos: Objeto[] = []
 
-    puedeContener(contenedor: Contenedor): Boolean {
+    puedeContener(contenedor: Contenedor): boolean {
         return false
-    };
+    }
 
     getObjetos(){
         return this.objetos
@@ -16,7 +16,7 @@ export abstract class Contenedor {
     }
 
     quitarObjeto(objeto: Objeto){
-        let posicion = this.objetos.indexOf(objeto)
+        const posicion = this.objetos.indexOf(objeto)
         if(posicion != -1){
             this.objetos.splice(posicion,1);
         } else {

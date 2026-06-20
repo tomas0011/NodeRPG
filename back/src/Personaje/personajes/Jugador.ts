@@ -2,22 +2,15 @@ import { Inventario } from "../../Contenedor/Inventario";
 import { Personaje } from "../Personaje";
 
 export class PersonajeJugable extends Personaje {
-    private static personaje: Personaje
-    
-    public static getInstance(): Personaje {
-        if (!PersonajeJugable.personaje) {
-            PersonajeJugable.personaje = new PersonajeJugable(10);
-        }
-        return PersonajeJugable.personaje
-    }
+    private nombre: string;
 
-    public static setInstance(newConstructor: any): Personaje {
-        PersonajeJugable.personaje = new newConstructor(PersonajeJugable.getInstance());
-        return PersonajeJugable.personaje
+    constructor(nombre: string = 'Tomas', vidaMaxima: number = 10) {
+        super(vidaMaxima);
+        this.nombre = nombre;
     }
 
     getNombre(): string {
-        return 'Tomas'
+        return this.nombre;
     }
 
     getVidaMaxima(): number {
@@ -31,4 +24,4 @@ export class PersonajeJugable extends Personaje {
     getInventario(): Inventario {
         return this.inventario
     }
-} 
+}

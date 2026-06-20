@@ -1,29 +1,34 @@
-import { Escenario } from '../../Escenario/Escenario';
+import CommandResult from '../../Game/CommandResult';
+import GameState from '../../Game/GameState';
 import { Objeto } from '../../Objeto/Objeto';
-import { PersonajeJugable } from '../../Personaje/personajes/Jugador';
 import IComando from '../IComando';
 
 class TomarObjeto implements IComando {
     getKey() {
         return 'tomar'
     }
-    
+
     esComando(comando: string) {
         return comando === this.getKey()
     }
 
-    ejecutar(nombreDeObjeto: string) {
-        try {
-            console.log('en ejecutar')
-            const objetoEncontrado = Escenario.getInstance().getLugar().getObjetos().find((objeto: Objeto) => objeto.getNombre() === nombreDeObjeto)
-            if (!objetoEncontrado) {
-                return 'No se encuentra el objeto'
-            }
-            PersonajeJugable.getInstance().getInventario().agregarObjeto(objetoEncontrado)
-            return `Tomaste un/a "${objetoEncontrado.getNombre()}"`
-        } catch (error) {
-            console.log(error)
+    ejecutar(nombreDeObjeto: string, state: GameState): CommandResult {
+        const objetosDelLugar = state.escenario.getLugar().getObjetos()
+        const objetoEncontrado = objetosDelLugar.find((objeto: Objeto) => objeto.getNombre() === nombreDeObjeto)
+        if (!objetoEncontrado) {
+            return { ok: false, message: 'No se encuentra el objeto' };
         }
+        state.jugadorBase.getInventario().agregarObjeto(objetoEncontrado)
+        const posicion = objetosDelLugar.indexOf(objetoEncontrado)
+        if (posicion !== -1) {
+            objetosDelLugar.splice(posicion, 1)
+        }
+        const inventario = state.jugadorBase.getInventario().getObjetos().map((objeto) => objeto.getNombre());
+        return {
+            ok: true,
+            message: `Tomaste un/a "${objetoEncontrado.getNombre()}"`,
+            completions: { equipar: inventario }
+        };
     }
 }
 
