@@ -1,0 +1,17 @@
+# No copiar a la imagen Docker. node_modules se reinstala dentro; dist se
+# recompila; .env NUNCA va a la imagen (las vars las inyecta Render).
+node_modules
+dist
+.env
+.env.*
+!.env.example
+*.log
+npm-debug.log*
+.git
+.gitignore
+Dockerfile
+.dockerignore
+tests
+coverage
+.eslintrc.cjs
+.prettierrc

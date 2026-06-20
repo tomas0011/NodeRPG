@@ -1,0 +1,33 @@
+# Blueprint de Render para el backend de NodeRPG (Infrastructure as Code).
+# Render lo detecta en la RAÍZ del repo. Define un único servicio web.
+#
+# Estrategia: runtime Docker apuntando a `back/Dockerfile`. Se eligió Docker
+# (en vez de runtime Node con buildCommand/startCommand) porque el repo tiene
+# DOS proyectos npm (back/ y app/) sin package.json raíz; el Dockerfile fija el
+# contexto a `back/`, la versión de Node (20, alineada con engines.node) y un
+# arranque de producción simple (`node dist/index.js`), sin depender de
+# rootDir/cwd ni de scripts de dev (concurrently/nodemon).
+#
+# Antes del primer deploy, en el dashboard de Render hay que cargar a mano las
+# env vars marcadas `sync: false` (no se versionan): MONGO_CONNECTION_STRING y
+# CORS_ORIGIN. PORT lo inyecta Render automáticamente (no hace falta declararlo).
+
+services:
+  - type: web
+    name: noderpg-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: back/Dockerfile
+    dockerContext: back
+    region: oregon
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # Cadena de conexión a MongoDB Atlas. SECRETO: cárgala en el dashboard.
+      - key: MONGO_CONNECTION_STRING
+        sync: false
+      # Origen del frontend en Vercel (CORS). Cárgalo en el dashboard cuando
+      # tengas la URL de Vercel, p. ej. https://noderpg.vercel.app
+      # (acepta lista separada por comas). Si se deja vacío, CORS abre a todos.
+      - key: CORS_ORIGIN
+        sync: false
