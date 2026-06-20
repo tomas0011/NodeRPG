@@ -1,7 +1,11 @@
 import CommandResult from '../../Game/CommandResult';
 import GameState from '../../Game/GameState';
 import { Objeto } from '../../Objeto/Objeto';
+import ObjetoFactory from '../../Objeto/ObjetoFactory';
 import { Personaje } from '../../Personaje/Personaje';
+import type { ResultadoXp } from '../../Personaje/IPersonaje';
+import CurvaDeNivel from '../../Personaje/CurvaDeNivel';
+import type ILugar from '../../Escenario/Lugar/ILugar';
 import type { IEstrategiaDeAtaque } from '../../Objeto/estrategias/IEstrategiaDeAtaque';
 import PunosStrategy from '../../Objeto/estrategias/PunosStrategy';
 import IComando from '../IComando';
@@ -15,18 +19,31 @@ import IComando from '../IComando';
  * puños por defecto.
  *
  * **Orden del turno (determinista):** primero golpea el jugador; **si el golpe
- * mata al NPC, se cobra su botín** (`getRecompensa()` del enemigo) — `oro` a la
- * run (jugador) y `plata` a `state.plataAcumulada` (a bancar al perfil al
- * cerrar). Sólo si el NPC sobrevive **contraataca** de forma determinista (sin
- * azar): resta a la vida del jugador su `dadoDeGolpe()` mitigado por la
- * `claseDeArmadura()` del jugador. Si tras el intercambio el jugador queda con
- * vida <= 0, la run se marca **terminada por muerte** (sólo se setea el flag; el
- * cierre real lo hace el ciclo de sesión) — el botín ya cobrado se conserva.
+ * mata al NPC, se cobra su botín** — monedas (`getRecompensa()`: `oro` a la run /
+ * `plata` a `state.plataAcumulada`) **y objetos encontrables** (`getBotin()`: ids
+ * instanciados vía `ObjetoFactory` y **soltados en la sala actual** para que el
+ * jugador los recoja con `tomar`, 3g). Sólo si el NPC sobrevive **contraataca**
+ * de forma determinista (sin azar): resta a la vida del jugador su `dadoDeGolpe()`
+ * mitigado por la `claseDeArmadura()` del jugador. Si tras el intercambio el
+ * jugador queda con vida <= 0, la run se marca **terminada por muerte** (sólo se
+ * setea el flag; el cierre real lo hace el ciclo de sesión) — el botín ya
+ * otorgado se conserva.
  *
- * El botín es **comportamiento del enemigo** (`getRecompensa()`), no un número
- * fijo aquí. El oro se otorga al jugador (viaja en el DTO de la run vía
- * `jugadorBase.getOro()`); la plata se acumula para bancar (3b lo banca al
- * cerrar). Fuera de alcance: no se toca el perfil/histórico aquí.
+ * El botín es **comportamiento del enemigo** (`getRecompensa()`/`getBotin()`), no
+ * un valor fijo aquí. El oro se otorga al jugador (viaja en el DTO vía
+ * `jugadorBase.getOro()`); la plata se acumula para bancar (3b). Los **objetos**
+ * de `getBotin()` son loot **encontrable de la run** (gratis al derrotar),
+ * distinto de los **comprables** del hub (plata) y de la tienda en-run (oro): NO
+ * usan los catálogos de tienda.
+ *
+ * **Dónde cae el loot y persistencia (3g):** los objetos del botín caen al
+ * **suelo de la sala actual** (refuerza el loop `tomar`/exploración). Lo que el
+ * jugador **toma** entra al inventario y **persiste** (el inventario se serializa
+ * en el DTO de la run). El loot del **suelo** es **efímero**: la sala se
+ * reconstruye por `lugarId` desde el `MapaLayout` (no se serializa entera), así
+ * que el loot soltado y NO tomado se pierde al recargar — comportamiento honesto
+ * y documentado; 3h lo hará determinista por semilla. No hay inconsistencia
+ * silenciosa: para conservar loot, hay que `tomar`-lo.
  */
 export default class Atacar implements IComando {
     getKey() {
@@ -61,12 +78,23 @@ export default class Atacar implements IComando {
         // plata a `plataAcumulada` (a bancar al perfil al cerrar la run, 3b).
         let oroGanado = 0;
         let plataGanada = 0;
+        let botinSoltado: string[] = [];
+        // XP otorgada al derrotar (3i): vive en la run; al cruzar el umbral sube
+        // de nivel (puede subir varios) aumentando vidaMaxima/destreza.
+        let resultadoXp: ResultadoXp | undefined;
         if (murioNpc) {
             const recompensa = objetivo.getRecompensa();
             oroGanado = Math.max(0, recompensa.oro);
             plataGanada = Math.max(0, recompensa.plata);
             state.jugador.ganarOro(oroGanado);
             state.plataAcumulada += plataGanada;
+            // XP del enemigo: comportamiento del NPC (getXp()), separado de
+            // monedas/loot. Acumula en el jugador y resuelve la subida de nivel.
+            resultadoXp = state.jugador.ganarXp(objetivo.getXp());
+            // Loot encontrable: instanciar los ids de getBotin() vía ObjetoFactory
+            // y soltarlos en el suelo de la sala actual (el jugador los recoge con
+            // `tomar`). Objetos, no monedas; no usa los catálogos de tienda.
+            botinSoltado = this.soltarBotin(objetivo, lugar);
         }
 
         // Contraataque determinista: sólo si el NPC sigue vivo, golpea al jugador.
@@ -91,7 +119,9 @@ export default class Atacar implements IComando {
             murioJugador,
             vidaJugador,
             oroGanado,
-            plataGanada
+            plataGanada,
+            botinSoltado,
+            resultadoXp
         );
 
         return {
@@ -108,12 +138,31 @@ export default class Atacar implements IComando {
                 // Botín de esta acción y totales acumulados de la run.
                 oroGanado,
                 plataGanada,
+                // XP de esta acción y estado de progresión (3i). Efímero: vive en
+                // la run. `subioNivel`/`nivelesSubidos` indican si subió (y cuántos).
+                xpGanada: resultadoXp ? resultadoXp.xpGanada : 0,
+                subioNivel: resultadoXp ? resultadoXp.subioNivel : false,
+                nivelesSubidos: resultadoXp ? resultadoXp.nivelesSubidos : 0,
+                nivel: state.jugador.getNivel(),
+                xp: state.jugador.getXpActual(),
+                xpParaSiguiente: resultadoXp
+                    ? resultadoXp.xpParaSiguiente
+                    : CurvaDeNivel.xpParaSiguiente(state.jugador.getNivel()),
+                // Ids de los objetos encontrables soltados en la sala por el NPC
+                // derrotado (vacío si no soltó loot). El jugador los recoge con
+                // `tomar`; viajan en data.botin para que la TUI los anuncie.
+                botin: botinSoltado,
                 oroTotal: state.jugador.getOro(),
                 plataAcumulada: state.plataAcumulada,
                 terminada: state.terminada,
                 causaFin: state.causaFin
             },
-            completions: { atacar: this.npcsVivos(lugar.getPersonajes()) }
+            completions: {
+                atacar: this.npcsVivos(lugar.getPersonajes()),
+                // Objetos tomables del suelo de la sala (incluye el loot recién
+                // soltado), para que el autocompletado de `tomar` lo refleje.
+                tomar: lugar.getObjetos().map((objeto) => objeto.getNombre())
+            }
         };
     }
 
@@ -139,11 +188,15 @@ export default class Atacar implements IComando {
         murioJugador: boolean,
         vidaJugador: number,
         oroGanado: number,
-        plataGanada: number
+        plataGanada: number,
+        botinSoltado: string[],
+        resultadoXp?: ResultadoXp
     ): string {
         if (murioNpc) {
             const botin = this.describirBotin(oroGanado, plataGanada);
-            return `${descripcionGolpe} ${nombreNpc} murió.${botin}`;
+            const loot = this.describirLoot(botinSoltado);
+            const xp = this.describirXp(resultadoXp);
+            return `${descripcionGolpe} ${nombreNpc} murió.${botin}${loot}${xp}`;
         }
         const contra = `${nombreNpc} contraataca por ${dañoRecibido} de daño.`;
         if (murioJugador) {
@@ -158,6 +211,56 @@ export default class Atacar implements IComando {
             return '';
         }
         return ` Botín: +${oroGanado} de oro, +${plataGanada} de plata.`;
+    }
+
+    /**
+     * Describe la XP ganada y, si subió de nivel, lo refleja (incluido multinivel:
+     * "subió 2 niveles"). Vacío si no ganó XP. Determinista, sin azar.
+     */
+    private describirXp(resultadoXp?: ResultadoXp): string {
+        if (!resultadoXp || resultadoXp.xpGanada <= 0) {
+            return '';
+        }
+        const base = ` +${resultadoXp.xpGanada} XP.`;
+        if (!resultadoXp.subioNivel) {
+            return base;
+        }
+        const niveles =
+            resultadoXp.nivelesSubidos > 1
+                ? `subiste ${resultadoXp.nivelesSubidos} niveles`
+                : 'subiste de nivel';
+        return `${base} ¡${niveles}! Ahora eres nivel ${resultadoXp.nivel}.`;
+    }
+
+    /**
+     * Describe los objetos encontrables soltados en la sala (loot), si los hubo.
+     * Vacío si el enemigo no soltó objetos. Invita a `tomar`-los.
+     */
+    private describirLoot(botinSoltado: string[]): string {
+        if (botinSoltado.length === 0) {
+            return '';
+        }
+        return ` Suelta en el suelo: ${botinSoltado.join(', ')} (usa "tomar").`;
+    }
+
+    /**
+     * Instancia el botín de objetos del NPC derrotado (`getBotin()`) vía
+     * `ObjetoFactory` y lo **suelta en el suelo de la sala actual** (lo agrega al
+     * array de objetos del lugar, donde `tomar` lo encuentra). Determinista: el
+     * loot es fijo por enemigo (sin azar; 3h lo sembrará). Los ids inválidos se
+     * ignoran (tolerante). Devuelve los ids realmente soltados.
+     */
+    private soltarBotin(npc: Personaje, lugar: ILugar): string[] {
+        const objetosDelLugar = lugar.getObjetos();
+        const soltados: string[] = [];
+        for (const id of npc.getBotin()) {
+            const objeto = ObjetoFactory.crear(id);
+            if (objeto) {
+                objetosDelLugar.push(objeto);
+                soltados.push(objeto.getNombre());
+            }
+        }
+        return soltados;
     }
 
     /** Busca un NPC vivo de la sala por su nombre. */

@@ -1,9 +1,9 @@
 import { randomUUID } from "crypto";
 import GameState from "../Game/GameState";
-import crearGameState from "../Game/crearGameState";
+import crearGameState, { generarSemilla } from "../Game/crearGameState";
 import SesionContexto from "../Game/SesionContexto";
 import GameStateMapper from "./GameStateMapper";
-import { ProfileDTO, ResumenRun } from "./dtos";
+import { ProfileDTO, ResumenRun, RunHistoryDTO } from "./dtos";
 import { ProfileRepository } from "./ProfileRepository";
 import { RunRepository } from "./RunRepository";
 import { RunHistoryRepository } from "./RunHistoryRepository";
@@ -72,14 +72,43 @@ export default class SessionManager {
 
         const profile = await this.cargarOcrearPerfil(sessionId);
         const state = await this.cargarRunActiva(profile);
+        const { historial, detalles } = await this.cargarHistorial(sessionId);
 
         const contexto = new SesionContexto(
             profile,
             state,
-            () => this.iniciarRun(profile)
+            () => this.iniciarRun(profile),
+            historial,
+            detalles
         );
 
         return { sessionId, profile, contexto };
+    }
+
+    /**
+     * Carga el **histórico (3j)** de la sesión desde el `RunHistoryRepository`:
+     * la lista de resúmenes (`list`, ya filtrada por `sessionId`) y, para cada
+     * run propia, su detalle completo (`getDetalle`). El mapa de detalles se
+     * construye SÓLO con los `runId` que `list` devolvió para esta sesión, así la
+     * pertenencia queda garantizada de forma estructural: nunca se inyecta el
+     * detalle de una run de otra sesión. El motor/comandos sólo leen este dato
+     * desde el `SesionContexto` (no importan Mongo).
+     */
+    private async cargarHistorial(
+        sessionId: string
+    ): Promise<{ historial: ResumenRun[]; detalles: Map<string, RunHistoryDTO> }> {
+        const historial = await this.historyRepo.list(sessionId);
+        const detalles = new Map<string, RunHistoryDTO>();
+        for (const resumen of historial) {
+            const detalle = await this.historyRepo.getDetalle(resumen.runId);
+            // Doble verificación de pertenencia: aunque `list` ya filtra por
+            // sessionId, sólo indexamos el detalle si efectivamente es de esta
+            // sesión (defensa contra docs inconsistentes).
+            if (detalle && detalle.sessionId === sessionId) {
+                detalles.set(resumen.runId, detalle);
+            }
+        }
+        return { historial, detalles };
     }
 
     /**
@@ -110,6 +139,10 @@ export default class SessionManager {
             nombre: state.jugador.getNombre(),
             salasVisitadas: state.salasVisitadas.length,
             oro: state.jugador.getOro(),
+            // Nivel alcanzado en la run (3i): se archiva en el resumen del
+            // histórico, NO en el perfil. XP/nivel se pierden con la run. Se lee
+            // por getter (reenviado por el Decorator si el jugador está equipado).
+            nivel: state.jugador.getNivel(),
             vidaActual: Math.max(0, state.jugador.getVidaActual()),
             plataBankeada,
             causa,
@@ -198,9 +231,13 @@ export default class SessionManager {
      */
     private iniciarRun(profile: ProfileDTO): GameState {
         const runId = SessionManager.nuevoSessionId();
+        // Mapa procedural (3h): genera una semilla VARIABLE para que cada run
+        // tenga su propio mapa determinista (el `RunGenerator` la consume por
+        // semilla). En tests, en cambio, `crearGameState` cae al layout fijo.
+        const semilla = generarSemilla();
         // Meta-progresión (3d): las mejoras compradas en el hub se aplican a los
         // stats/inventario iniciales del personaje al crear la run.
-        const state = crearGameState(profile.sessionId, runId, undefined, profile.mejoras);
+        const state = crearGameState(profile.sessionId, runId, semilla, profile.mejoras);
         profile.runActivaId = runId;
         this.cacheStates.set(runId, state);
         return state;

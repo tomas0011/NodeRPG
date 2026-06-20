@@ -5,13 +5,17 @@ import {
     Atacar,
     Comprar,
     CrearPersonaje,
+    Detalle,
     EquiparObjeto,
     GetEscenario,
     GetHelp,
     GetStatus,
+    Historial,
+    Mover,
     Perfil,
     Tienda,
-    TomarObjeto
+    TomarObjeto,
+    UsarObjeto
 } from "../Comando";
 import CommandResult from "./CommandResult";
 import GameState from "./GameState";
@@ -47,14 +51,18 @@ export default class GameEngine {
             new GetStatus(),
             new TomarObjeto(),
             new EquiparObjeto(),
-            new Atacar()
+            new Atacar(),
+            new UsarObjeto(),
+            new Mover()
         ];
         this.comandosSesion = [
             new CrearPersonaje(),
             new Abandonar(),
             new Perfil(),
             new Tienda(),
-            new Comprar()
+            new Comprar(),
+            new Historial(),
+            new Detalle()
         ];
     }
 

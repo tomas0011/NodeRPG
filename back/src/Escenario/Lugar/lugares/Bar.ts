@@ -1,33 +1,16 @@
-import { Objeto } from "../../../Objeto/Objeto";
-import { ArmaduraDeCuero } from "../../../Objeto/objetos/ArmaduraDeCuero";
-import { Espada } from "../../../Objeto/objetos/Espada";
-import { Taza } from "../../../Objeto/objetos/Taza";
-import { Personaje } from "../../../Personaje/Personaje";
-import { Cantinero } from "../../../Personaje/personajes/Cantinero";
-import ILugar from "../ILugar";
+import MapaDeRun from "../../MapaDeRun";
+import Sala from "./Sala";
 
-class Bar implements ILugar {
-    personajes: Personaje[] = [
-        new Cantinero()
-    ];
-
-    objetos: Objeto[] = [
-        new Taza(),
-        new Espada(),
-        new ArmaduraDeCuero()
-    ];
-
-    getNombre(): string {
-        return 'Bar Puerco Verde'
-    }
-
-    getPersonajes(): Personaje[] {
-        return this.personajes
-    }
-
-    getObjetos(): Objeto[] {
-        return this.objetos
+/**
+ * Sala inicial de la run (el hub de entrada del mapa). Su nombre, ocupantes,
+ * objetos y salidas salen del `MapaDeRun` de la run (layout fijo o generado por
+ * semilla) como cualquier otra sala — hay una única fuente del mapa.
+ *
+ * `LugarFactory` lo instancia con `new Bar(mapa)` para el `lugarId` inicial
+ * `'bar'`; la base `Sala` resuelve el contenido por ese id en el mapa dado.
+ */
+export default class Bar extends Sala {
+    constructor(mapa?: MapaDeRun) {
+        super('bar', mapa);
     }
 }
-
-export default Bar;

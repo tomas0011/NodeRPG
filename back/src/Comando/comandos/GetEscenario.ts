@@ -15,16 +15,19 @@ class GetEscenario implements IComando {
         const lugar = state.escenario.getLugar();
         const personajes = lugar.getPersonajes().map((personaje) => personaje.getNombre());
         const objetos = lugar.getObjetos().map((objeto) => objeto.getNombre());
+        const salidas = lugar.getSalidas();
+        const direcciones = Object.keys(salidas);
         const message = `
             Lugar: ${lugar.getNombre()}
             Personas: ${personajes}
             Objetos: ${objetos}
+            Salidas: ${direcciones}
         `;
         return {
             ok: true,
             message,
-            data: { lugar: lugar.getNombre(), personajes, objetos },
-            completions: { tomar: objetos }
+            data: { lugar: lugar.getNombre(), lugarId: state.lugarId, personajes, objetos, salidas },
+            completions: { tomar: objetos, mover: direcciones }
         };
     }
 }

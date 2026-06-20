@@ -40,13 +40,31 @@ const ARMADURA_DE_CUERO: Articulo = {
     moneda: 'oro'
 };
 
+const POCION_DE_CURACION: Articulo = {
+    id: 'poción de curación',
+    nombre: 'Poción de curación',
+    descripcion: 'Consumible: restaura vida (hasta el máximo).',
+    costo: 10,
+    moneda: 'oro'
+};
+
+const POCION_DE_DESTREZA: Articulo = {
+    id: 'poción de destreza',
+    nombre: 'Poción de destreza',
+    descripcion: 'Consumible: mejora la destreza durante la run.',
+    costo: 12,
+    moneda: 'oro'
+};
+
 export default class CatalogoArticulos {
     /** id de artículo (id de `ObjetoFactory`) → definición. */
     private static readonly registro: Record<string, Articulo> = {
         [ESPADA.id]: ESPADA,
         [ARCO.id]: ARCO,
         [MARTILLO.id]: MARTILLO,
-        [ARMADURA_DE_CUERO.id]: ARMADURA_DE_CUERO
+        [ARMADURA_DE_CUERO.id]: ARMADURA_DE_CUERO,
+        [POCION_DE_CURACION.id]: POCION_DE_CURACION,
+        [POCION_DE_DESTREZA.id]: POCION_DE_DESTREZA
     };
 
     /** Devuelve el artículo por su id, o `undefined` si no existe en el catálogo. */

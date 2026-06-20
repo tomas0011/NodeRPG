@@ -57,6 +57,10 @@ const JugadorSchema = new Schema<JugadorDTO>(
         vidaActual: { type: Number, required: true },
         destreza: { type: Number, required: true, default: 1 },
         oro: { type: Number, required: true, default: 0 },
+        // XP/nivel de la run (3i). Defaults tolerantes v1→v2: docs viejos sin
+        // estos campos quedan xp:0 / nivel:1. Efímeros (NO van al perfil).
+        xp: { type: Number, required: true, default: 0 },
+        nivel: { type: Number, required: true, default: 1 },
         inventario: { type: [String], required: true, default: [] },
         equipados: { type: [String], required: true, default: [] }
     },
@@ -118,6 +122,7 @@ const ResumenRunSchema = new Schema<ResumenRun>(
         nombre: { type: String, required: true },
         salasVisitadas: { type: Number, required: true, default: 0 },
         oro: { type: Number, required: true, default: 0 },
+        nivel: { type: Number, required: false },
         vidaActual: { type: Number, required: false },
         plataBankeada: { type: Number, required: false },
         causa: { type: String, required: false },

@@ -45,6 +45,8 @@ function normalizar(doc: RunDTO): RunDTO {
             vidaActual: typeof jugador.vidaActual === 'number' ? jugador.vidaActual : 10,
             destreza: typeof jugador.destreza === 'number' ? jugador.destreza : 1,
             oro: typeof jugador.oro === 'number' ? jugador.oro : 0,
+            xp: typeof jugador.xp === 'number' ? jugador.xp : 0,
+            nivel: typeof jugador.nivel === 'number' ? jugador.nivel : 1,
             inventario: Array.isArray(jugador.inventario) ? jugador.inventario : [],
             equipados: Array.isArray(jugador.equipados) ? jugador.equipados : []
         },

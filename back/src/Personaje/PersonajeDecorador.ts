@@ -1,5 +1,5 @@
 import { Inventario } from "../Contenedor/Inventario";
-import IPersonaje, { Recompensa } from "./IPersonaje";
+import IPersonaje, { Recompensa, ResultadoXp } from "./IPersonaje";
 
 export default class PersonajeDecorador implements IPersonaje {
     portadorDeArmadura: IPersonaje ;
@@ -8,6 +8,8 @@ export default class PersonajeDecorador implements IPersonaje {
     vidaActual!: number;
     inventario!: Inventario;
     oro!: number;
+    xp!: number;
+    nivel!: number;
 
     constructor(portadorDeArmadura: IPersonaje){
         this.portadorDeArmadura = portadorDeArmadura;
@@ -15,6 +17,10 @@ export default class PersonajeDecorador implements IPersonaje {
 
     getDestreza(){
         return this.portadorDeArmadura.getDestreza();
+    }
+
+    modificarDestreza(delta: number): number {
+        return this.portadorDeArmadura.modificarDestreza(delta);
     }
 
     getOro(): number {
@@ -31,6 +37,26 @@ export default class PersonajeDecorador implements IPersonaje {
 
     getRecompensa(): Recompensa {
         return this.portadorDeArmadura.getRecompensa();
+    }
+
+    getBotin(): string[] {
+        return this.portadorDeArmadura.getBotin();
+    }
+
+    getXp(): number {
+        return this.portadorDeArmadura.getXp();
+    }
+
+    ganarXp(cantidad: number): ResultadoXp {
+        return this.portadorDeArmadura.ganarXp(cantidad);
+    }
+
+    getNivel(): number {
+        return this.portadorDeArmadura.getNivel();
+    }
+
+    getXpActual(): number {
+        return this.portadorDeArmadura.getXpActual();
     }
 
     claseDeArmadura(): number {

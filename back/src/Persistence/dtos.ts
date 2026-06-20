@@ -12,8 +12,12 @@
  * ausentes en docs viejos caen a defaults sensatos).
  */
 
-/** Versión de esquema vigente de cada agregado. Bump al cambiar la forma. */
-export const SCHEMA_VERSION = 1;
+/**
+ * Versión de esquema vigente de cada agregado. Bump al cambiar la forma.
+ * v2 (3i): el `JugadorDTO` añade `xp`/`nivel`. Deserialización tolerante: docs
+ * v1 sin esos campos caen a `xp:0`/`nivel:1` sin romper.
+ */
+export const SCHEMA_VERSION = 2;
 
 /** Jugador de una run, en forma plana y serializable. */
 export interface JugadorDTO {
@@ -22,6 +26,16 @@ export interface JugadorDTO {
     vidaActual: number;
     destreza: number;
     oro: number;
+    /**
+     * XP acumulada hacia el siguiente nivel (run; 3i). Tolerante: ausente en docs
+     * v1 ⇒ 0. **Efímero**: vive en la run, NO en el perfil.
+     */
+    xp: number;
+    /**
+     * Nivel dentro de la run (3i). Tolerante: ausente en docs v1 ⇒ 1.
+     * **Efímero**: vive en la run, NO en el perfil.
+     */
+    nivel: number;
     /** Ids (nombres) de los objetos del inventario. */
     inventario: string[];
     /** Ids (nombres) de los objetos equipados, en orden de equipamiento. */
@@ -68,6 +82,8 @@ export interface ResumenRun {
     nombre: string;
     salasVisitadas: number;
     oro: number;
+    /** Nivel alcanzado en la run al cerrarla (3i). Efímero del resumen, opcional. */
+    nivel?: number;
     /** Vida del jugador al cerrar la run (0 si murió). */
     vidaActual?: number;
     /** Plata bankeada al perfil al cerrar la run. */

@@ -5,6 +5,8 @@ import { Martillo } from "./objetos/Martillo";
 import { Taza } from "./objetos/Taza";
 import { ArmaduraDeCuero } from "./objetos/ArmaduraDeCuero";
 import { ArmaduraDePlacas } from "./objetos/ArmaduraDePlacas";
+import { PocionDeCuracion } from "./objetos/PocionDeCuracion";
+import { PocionDeDestreza } from "./objetos/PocionDeDestreza";
 
 /**
  * Constructor sin argumentos de un `Objeto` concreto.
@@ -17,8 +19,9 @@ type ConstructorDeObjeto = new () => Objeto;
  * necesite guardar ids: el comportamiento (estrategias, decoradores de equipo)
  * es código, no estado, y se reconstruye junto con el objeto.
  *
- * Mapea los objetos existentes del dominio: `espada`, `taza`, `armadura de
- * cuero` y `armadura de placas`.
+ * Mapea los objetos existentes del dominio: armas (`espada`, `arco`,
+ * `martillo`), `taza`, armaduras (`armadura de cuero`, `armadura de placas`) y
+ * consumibles (`poción de curación`, `poción de destreza`).
  */
 export default class ObjetoFactory {
     /** id (nombre del objeto) → constructor concreto. */
@@ -28,7 +31,9 @@ export default class ObjetoFactory {
         'martillo': Martillo,
         'taza': Taza,
         'armadura de cuero': ArmaduraDeCuero,
-        'armadura de placas': ArmaduraDePlacas
+        'armadura de placas': ArmaduraDePlacas,
+        'poción de curación': PocionDeCuracion,
+        'poción de destreza': PocionDeDestreza
     };
 
     /**

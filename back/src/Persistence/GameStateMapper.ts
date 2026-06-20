@@ -29,6 +29,10 @@ export default class GameStateMapper {
             vidaActual: state.jugadorBase.getVidaActual(),
             destreza: state.jugadorBase.getDestreza(),
             oro: state.jugadorBase.getOro(),
+            // XP/nivel de la run (3i). Efímeros: se persisten dentro de la run,
+            // NO en el perfil (se pierden al cerrar la run con ella).
+            xp: state.jugadorBase.xp,
+            nivel: state.jugadorBase.nivel,
             inventario,
             // Copia defensiva: el DTO no debe compartir el array vivo del state.
             equipados: state.equipados.slice()
@@ -67,6 +71,11 @@ export default class GameStateMapper {
         jugadorBase.vidaActual = typeof jugadorDto.vidaActual === 'number' ? jugadorDto.vidaActual : vidaMaxima;
         jugadorBase.destreza = typeof jugadorDto.destreza === 'number' ? jugadorDto.destreza : 1;
         jugadorBase.oro = typeof jugadorDto.oro === 'number' ? jugadorDto.oro : 0;
+        // XP/nivel de la run (3i). Tolerante v1→v2: docs viejos sin estos campos
+        // caen a xp:0 / nivel:1 sin romper. vidaMaxima ya viaja en el DTO, así
+        // que el bonus de niveles previos no se re-aplica (no se duplica).
+        jugadorBase.xp = typeof jugadorDto.xp === 'number' ? jugadorDto.xp : 0;
+        jugadorBase.nivel = typeof jugadorDto.nivel === 'number' ? jugadorDto.nivel : 1;
 
         // Reconstruye el inventario desde los ids (objetos vivos vía fábrica).
         const inventarioIds = jugadorDto.inventario || [];
@@ -77,16 +86,20 @@ export default class GameStateMapper {
             }
         }
 
-        const lugarId = (dto.escenario && dto.escenario.lugarId) || LugarFactory.LUGAR_INICIAL;
+        // Semilla del DTO: con ella se REGENERA el mismo mapa (no se serializa).
+        const semilla = typeof dto.semilla === 'number' ? dto.semilla : 0;
+        // Sala inicial del mapa de esa semilla, por si el DTO no trae lugarId.
+        const lugarId = (dto.escenario && dto.escenario.lugarId) || LugarFactory.lugarInicial(semilla);
         const salasVisitadas = (dto.escenario && dto.escenario.salasVisitadas) || [];
-        const escenario = new Escenario(LugarFactory.crear(lugarId));
+        // Reconstruye la sala actual dentro del mapa de la semilla (determinista).
+        const escenario = new Escenario(LugarFactory.crear(lugarId, semilla));
 
         const state = new GameState(
             jugadorBase,
             escenario,
             dto.sessionId,
             dto.runId,
-            typeof dto.semilla === 'number' ? dto.semilla : 0,
+            semilla,
             lugarId,
             salasVisitadas.slice()
         );
