@@ -1,21 +1,22 @@
-import { Personaje } from "../Personaje/Personaje";
-import { PersonajeJugable } from "../Personaje/personajes/Jugador";
 import ILugar from "./Lugar/ILugar";
-import Bar from "./Lugar/lugares/Bar";
 
 export class Escenario {
-    private static escenario: Escenario;
+    private lugar: ILugar;
 
-    private lugar: ILugar = new Bar();
-
-    public static getInstance(): Escenario {
-        if (!Escenario.escenario) {
-            Escenario.escenario = new Escenario();
-        }
-        return Escenario.escenario
+    constructor(lugar: ILugar) {
+        this.lugar = lugar;
     }
 
     public getLugar(): ILugar {
         return this.lugar
+    }
+
+    /**
+     * Cambia el lugar actual del escenario (lo usa `mover` al desplazarse a una
+     * sala conectada). El `lugarId` del `GameState` se actualiza en paralelo para
+     * que la serialización por id siga siendo la fuente de la posición.
+     */
+    public setLugar(lugar: ILugar): void {
+        this.lugar = lugar
     }
 }

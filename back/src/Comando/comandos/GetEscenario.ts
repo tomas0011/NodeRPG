@@ -1,5 +1,5 @@
-import { Escenario } from '../../Escenario/Escenario';
-import { PersonajeJugable } from '../../Personaje/personajes/Jugador';
+import CommandResult from '../../Game/CommandResult';
+import GameState from '../../Game/GameState';
 import IComando from '../IComando';
 
 class GetEscenario implements IComando {
@@ -11,12 +11,24 @@ class GetEscenario implements IComando {
         return comando === this.getKey()
     }
 
-    ejecutar() {
-        return `
-            Lugar: ${Escenario.getInstance().getLugar().getNombre()}
-            Personas: ${Escenario.getInstance().getLugar().getPersonajes().map((personaje) => personaje.getNombre())}
-            Objetos: ${Escenario.getInstance().getLugar().getObjetos().map((objeto) => objeto.getNombre())}
+    ejecutar(_agente: string, state: GameState): CommandResult {
+        const lugar = state.escenario.getLugar();
+        const personajes = lugar.getPersonajes().map((personaje) => personaje.getNombre());
+        const objetos = lugar.getObjetos().map((objeto) => objeto.getNombre());
+        const salidas = lugar.getSalidas();
+        const direcciones = Object.keys(salidas);
+        const message = `
+            Lugar: ${lugar.getNombre()}
+            Personas: ${personajes}
+            Objetos: ${objetos}
+            Salidas: ${direcciones}
         `;
+        return {
+            ok: true,
+            message,
+            data: { lugar: lugar.getNombre(), lugarId: state.lugarId, personajes, objetos, salidas },
+            completions: { tomar: objetos, mover: direcciones }
+        };
     }
 }
 

@@ -11,9 +11,25 @@ export class RequestManager {
         return RequestManager.requestManager
     }
 
+    /**
+     * Obtiene el sessionId persistido en localStorage; si no existe, genera uno
+     * (UUID) y lo guarda. Identifica al jugador entre peticiones y reinicios.
+     */
+    private getSessionId(): string {
+        let sessionId = localStorage.getItem('sessionId');
+        if (!sessionId) {
+            sessionId = crypto.randomUUID();
+            localStorage.setItem('sessionId', sessionId);
+        }
+        return sessionId;
+    }
+
     public async getCommand(command: string, responseTrigger: any): Promise<void> {
         try {
-            const { data } = await axios.get(`${this.host}/command?command=${command}`)
+            const sessionId = this.getSessionId();
+            const { data } = await axios.get(
+                `${this.host}/command?command=${command}&sessionId=${encodeURIComponent(sessionId)}`
+            )
             responseTrigger(data)
         } catch (error) {
             responseTrigger({
