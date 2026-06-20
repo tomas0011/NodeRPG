@@ -7,13 +7,18 @@ export default class PersonajeDecorador implements IPersonaje {
     vidaMaxima!: number;
     vidaActual!: number;
     inventario!: Inventario;
-    
+    oro!: number;
+
     constructor(portadorDeArmadura: IPersonaje){
         this.portadorDeArmadura = portadorDeArmadura;
     }
 
     getDestreza(){
         return this.portadorDeArmadura.getDestreza();
+    }
+
+    getOro(): number {
+        return this.portadorDeArmadura.getOro();
     }
 
     claseDeArmadura(): number { 

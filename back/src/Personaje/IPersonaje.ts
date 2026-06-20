@@ -5,7 +5,9 @@ export default interface IPersonaje {
     vidaActual: number
     inventario: Inventario
     destreza: number
+    oro: number
     getDestreza(): number
+    getOro(): number
     claseDeArmadura(): number
     getVidaMaxima(): number
     getVidaActual(): number

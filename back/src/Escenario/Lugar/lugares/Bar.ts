@@ -7,8 +7,6 @@ import { Cantinero } from "../../../Personaje/personajes/Cantinero";
 import ILugar from "../ILugar";
 
 class Bar implements ILugar {
-    static bar: Bar
-
     personajes: Personaje[] = [
         new Cantinero()
     ];
@@ -18,13 +16,6 @@ class Bar implements ILugar {
         new Espada(),
         new ArmaduraDeCuero()
     ];
-
-    public static getInstance() {
-        if (!Bar.bar) {
-            Bar.bar = new Bar()
-        }
-        return Bar.bar
-    }
 
     getNombre(): string {
         return 'Bar Puerco Verde'

@@ -6,6 +6,7 @@ export class Personaje implements IPersonaje {
     vidaActual: number
     inventario: Inventario
     destreza: number =  1;
+    oro: number = 0;
 
     constructor(vidaMaxima: number = 10){
         this.vidaMaxima = vidaMaxima
@@ -15,6 +16,10 @@ export class Personaje implements IPersonaje {
 
     getDestreza(): number {
         return this.destreza;
+    }
+
+    getOro(): number {
+        return this.oro;
     }
     
     claseDeArmadura(): number {

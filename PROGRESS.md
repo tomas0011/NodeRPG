@@ -28,9 +28,14 @@ Testeadores su veredicto.
 ## Estado actual
 
 - **Fecha de última actualización**: 2026-06-20
-- **Foco actual**: **Fase 0 HECHA ✅** (build/lint/test/servidor verificados). Lista para arrancar F1.
-- **Bloqueos abiertos**: ninguno.
-- **Próximo paso global**: arrancar **Fase 1** (desacoplar Singletons/HTTP) — la fase más grande; pendiente de luz verde.
+- **Foco actual**: **Fase 2 HECHA ✅** — persistencia verificada contra Atlas real (smoke verde). Lista para F3.
+- **Rama de trabajo**: `feat/new-tui-rpg` (el usuario partió de aquí; al terminar se mergea a `develop`).
+- **Bloqueos abiertos**: ninguno (la credencial de Atlas quedó resuelta por el usuario; conexión OK).
+- **Próximo paso global**: arrancar **Fase 3** (jugabilidad roguelike). Sugerido empezar por **3a** (`atacar` + Strategy de armas, solo depende de F1).
+- **Nota Atlas**: la env var se llama **`MONGO_CONNECTION_STRING`** (no `MONGODB_URI`). El código usa ese nombre + `dotenv`.
+- **Cambios F1+F2 sin commitear**: el árbol tiene los cambios de F1 y F2 en working tree (F0 ya commiteada en `eb2fb8a`). El usuario maneja sus commits.
+- **Verificación cruzada (post-F0)**: `back/` build/test/lint/servidor ✅; `app/` `npm run build` ✅ exit 0
+  (warning preexistente de `useEffect` en `consoleOutput.tsx`, no bloqueante). F0 fue solo `back/` (app va en F4).
 - **Nota de entorno**: el Implementador/Testeador no pueden ejecutar `npm` (denegado en su sandbox);
   el Orquestador (sesión principal) **sí** puede → la verificación empírica la corre el Orquestador.
 - **Decisiones del usuario pendientes para fases futuras**: cadena `MONGODB_URI` de Atlas (Fase 2);
@@ -43,8 +48,8 @@ Testeadores su veredicto.
 | ID | Fase | Estado | Depende de | Próximo paso |
 |----|------|--------|-----------|--------------|
 | F0 | Base de tooling (TS5, jest, eslint, prettier, fix bugs latentes) | HECHO ✅ | — | — |
-| F1 | Desacoplar Singletons y HTTP (GameState, GameEngine, equipo por ids, CommandResult) | PENDIENTE | F0 | — |
-| F2 | Sesiones + persistencia MongoDB Atlas (perfil/run/histórico, repos, mapper) | PENDIENTE | F1 | — |
+| F1 | Desacoplar Singletons y HTTP (GameState, GameEngine, equipo por ids, CommandResult) | HECHO ✅ | F0 | — |
+| F2 | Sesiones + persistencia MongoDB Atlas (perfil/run/histórico, repos, mapper) | HECHO ✅ | F1 | — |
 | F3 | Jugabilidad roguelike (3a–3j, ver detalle) | PENDIENTE | F1/F2 | — |
 | F4 | Despliegue (Vercel + backend persistente) | PENDIENTE | F2 | — |
 
@@ -71,25 +76,38 @@ Testeadores su veredicto.
   preexistente; lo resolverá el `CommandResult` tipado de F1.
 
 ### F1 — Desacoplar Singletons y HTTP
-- **Estado**: PENDIENTE
-- **Alcance**: `GameState` (instancia), `GameEngine.ejecutar(input, state)`, des-singletonizar
-  `Escenario`/`Bar`/`PersonajeJugable`, nuevo `IComando.ejecutar(agente, state)`, equipo como
-  **ids equipados + `rebuildDecoratedPlayer()`**, `CommandResult { ok, message, data?, completions? }`.
-- **Criterios**: tests del engine sin HTTP ni globales (tomar→equipar→status cambia stats);
-  dos `GameState` no se interfieren (multi-sesión); la app sigue andando con un state temporal.
-- **Avance / Veredicto / Próximo paso**: —
-- **Nota**: fase más grande y delicada; punto sensible = migración de equipo (Decorator) al modelo por ids.
+- **Estado**: HECHO ✅ (Implementador 2026-06-20; verificado por el Orquestador)
+- **Hecho** (nuevos): `Game/GameState.ts` (instancia, equipo por ids `equipados[]` + `rebuildDecoratedPlayer()`
+  determinista por orden de inserción), `Game/GameEngine.ts` (`ejecutar(input, state)`, sin estado de juego),
+  `Game/CommandResult.ts`, `Game/crearGameState.ts` (factory), `tests/gameEngine.test.ts` (13 casos).
+  Borrados: `Comando/ComandosManager.ts` y su test.
+- **Hecho** (modif): `IComando.ejecutar(agente, state)`; comandos `GetStatus/GetEscenario/TomarObjeto/EquiparObjeto/GetHelp`
+  leen del `state`; `Escenario`/`Bar`/`PersonajeJugable` **des-singletonizados**; `index.ts` con un `GameState`
+  único a nivel de módulo (no singleton), respuesta con `content` + `ok`/`data`/`completions`.
+- **Diseño**: `jugadorBase` (dueño del inventario) + `jugador` derivado decorado. `equipar(id)` idempotente
+  (valida inventario+equipable, añade id, rebuild); `desequipar(id)` quita+rebuild. `GetHelp` recibe las claves
+  por inyección (closure del engine), sin acceso global. Equipo = función pura de (base + ids) → serializable para F2.
+- **Veredicto (Orquestador, empírico)**: PASA. `build` exit 0 (TS5 strict); `npm test` **13/13** (incluye multi-sesión,
+  idempotencia, desequipar, rebuild determinista espada+cuero); `lint` exit 0; servidor: `status`→200 con `content`+`data`,
+  `escenario`→200 con `completions:{tomar:[...]}`, inválido→400; `grep` confirma **cero** globales de estado de juego residuales.
+- **Notas (no bloqueantes)**: comando inválido sigue devolviendo `{"error":{}}` (Error vacío preexistente; CommandResult
+  ya existe → fácil de pulir en F2/F4); `Objeto.getModificacion(): any` preexistente; warnings de params `_` en `GetHelp`.
 
 ### F2 — Sesiones + persistencia (MongoDB Atlas)
-- **Estado**: PENDIENTE
-- **Alcance**: `sessionId` (UUID) por header/query + localStorage; colecciones `profiles`/`runs`/`runHistory`;
-  `ProfileRepository`/`RunRepository`/`RunHistoryRepository` (interfaz + InMemory + Mongo/mongoose);
-  DTO plano + `GameStateMapper` + `ObjetoFactory`/`LugarFactory`; `schemaVersion` día 1; ciclo
-  resolver→cargar→ejecutar→guardar con caché write-through.
-- **Criterios**: round-trip `toDTO/fromDTO` in-memory; smoke contra Atlas (persiste tras reinicio);
-  el perfil sobrevive aunque se borre la run.
-- **Bloqueo potencial**: requiere `MONGODB_URI` de Atlas (decisión/credencial del usuario).
-- **Avance / Veredicto / Próximo paso**: —
+- **Estado**: HECHO ✅ (Implementador 2026-06-20; verificado por el Orquestador, incl. smoke Atlas real)
+- **Hecho** (nuevos en `Persistence/`): `dtos.ts` (+`SCHEMA_VERSION=1`), `GameStateMapper.ts`,
+  `ProfileRepository`/`RunRepository`/`RunHistoryRepository` (interfaz + InMemory), `Mongo*Repository.ts` (mongoose),
+  `mongo.ts` (bootstrap `conectarMongo`/esquemas), `SessionManager.ts` (resolución sesión + caché write-through);
+  `Objeto/ObjetoFactory.ts`, `Escenario/LugarFactory.ts`; `tests/persistence.test.ts`.
+- **Hecho** (modif): `index.ts` (ciclo sesión + dotenv + bootstrap), `Game/{GameState,crearGameState}` (+runId/semilla/lugarId/salasVisitadas),
+  `Personaje/*` (+`oro`/`getOro()` default 0), `package.json` (+mongoose ^8.5.1, +dotenv ^16.4.5),
+  `app/src/utils/RequestManager.ts` (sessionId en localStorage vía `crypto.randomUUID()`, enviado como `?sessionId=`).
+- **Sesión**: header `x-session-id` o query `?sessionId=`; si falta, genera UUID y lo devuelve. Perfil siempre; run se crea si no hay.
+- **Veredicto (Orquestador, empírico)**: PASA. `build` ✅, `npm test` **23/23** ✅ (round-trip sin pérdida, perfil sobrevive
+  a borrar run, multi-sesión — repos InMemory), `lint` ✅. **Smoke Atlas real ✅** (tras corregir la credencial): guardar run con
+  espada equipada → desconectar (simula reinicio) → reconectar caché fría → cargar → `dadoDeGolpe=6` y `equipados=["espada"]`
+  reconstruidos sin pérdida; inventario recuperado; run borrada pero **perfil sobrevive**. Datos de prueba limpiados de Atlas.
+- **Nota**: el smoke se hizo con un script temporal a nivel de repos (`conectar/save/desconectar/reconectar/load`), ya eliminado.
 
 ### F3 — Jugabilidad roguelike (envío incremental por sub-fase)
 - **Estado**: PENDIENTE
@@ -141,6 +159,12 @@ Testeadores su veredicto.
 
 ## Bitácora (lo más reciente arriba)
 
+- **2026-06-20** — **F2 HECHA ✅**: persistencia (repos InMemory+Mongo, mapper, sesiones, caché write-through). build +
+  23/23 tests + lint verdes; **smoke contra Atlas real PASA** (persiste tras reinicio, perfil sobrevive a borrar run).
+  La credencial de Atlas la corrigió el usuario.
+- **2026-06-20** — **F1 HECHA ✅**: `GameState`/`GameEngine`/`CommandResult`, des-singletonizado, equipo por ids,
+  multi-sesión. Verificada por el Orquestador (build + 13/13 tests + lint + servidor + grep sin globales).
+- **2026-06-20** — Arranca **F1** (desacoplar Singletons/HTTP). Verificado de paso que `app/` buildea ✅.
 - **2026-06-20** — **F0 HECHA ✅**: tooling (TS5/jest/eslint/prettier) + 3 bugs corregidos. Verificada
   empíricamente por el Orquestador (build/test/lint/servidor verdes). 486 paquetes instalados en `back/`.
 - **2026-06-20** — Acordado `PLAN.md` (cambios grandes) y descompuesto en F0–F4 en este archivo.

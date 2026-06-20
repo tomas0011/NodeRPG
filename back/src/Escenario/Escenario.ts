@@ -1,18 +1,10 @@
-import { Personaje } from "../Personaje/Personaje";
-import { PersonajeJugable } from "../Personaje/personajes/Jugador";
 import ILugar from "./Lugar/ILugar";
-import Bar from "./Lugar/lugares/Bar";
 
 export class Escenario {
-    private static escenario: Escenario;
+    private lugar: ILugar;
 
-    private lugar: ILugar = new Bar();
-
-    public static getInstance(): Escenario {
-        if (!Escenario.escenario) {
-            Escenario.escenario = new Escenario();
-        }
-        return Escenario.escenario
+    constructor(lugar: ILugar) {
+        this.lugar = lugar;
     }
 
     public getLugar(): ILugar {
