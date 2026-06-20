@@ -18,6 +18,7 @@ class GetStatus implements IComando {
             Nombre: ${jugador.getNombre()}
             Clase de armadura: ${jugador.claseDeArmadura()}
             Dado de golpe: ${jugador.dadoDeGolpe()}
+            Oro: ${jugador.getOro()}
             Inventario: ${objetosEncontrados.length ? objetosEncontrados : 'vacio'}
         `;
         return {
@@ -27,6 +28,9 @@ class GetStatus implements IComando {
                 nombre: jugador.getNombre(),
                 claseDeArmadura: jugador.claseDeArmadura(),
                 dadoDeGolpe: jugador.dadoDeGolpe(),
+                // Oro de la run (efímero; se pierde al cerrar). La plata del
+                // perfil se consulta en el hub (comando `perfil`).
+                oro: jugador.getOro(),
                 inventario: objetosEncontrados,
                 equipados: state.equipados
             }

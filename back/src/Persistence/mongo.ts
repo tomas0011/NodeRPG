@@ -88,6 +88,7 @@ const RunSchema = new Schema<RunDTO>(
         sessionId: { type: String, required: true, index: true },
         schemaVersion: { type: Number, required: true },
         semilla: { type: Number, required: true, default: 0 },
+        plataAcumulada: { type: Number, required: true, default: 0 },
         jugador: { type: JugadorSchema, required: true },
         escenario: { type: EscenarioSchema, required: true }
     },
@@ -103,6 +104,7 @@ const RunSnapshotSchema = new Schema<RunDTO>(
         sessionId: { type: String, required: true },
         schemaVersion: { type: Number, required: true },
         semilla: { type: Number, required: true, default: 0 },
+        plataAcumulada: { type: Number, required: true, default: 0 },
         jugador: { type: JugadorSchema, required: true },
         escenario: { type: EscenarioSchema, required: true }
     },
@@ -116,6 +118,8 @@ const ResumenRunSchema = new Schema<ResumenRun>(
         nombre: { type: String, required: true },
         salasVisitadas: { type: Number, required: true, default: 0 },
         oro: { type: Number, required: true, default: 0 },
+        vidaActual: { type: Number, required: false },
+        plataBankeada: { type: Number, required: false },
         causa: { type: String, required: false },
         terminadaEn: { type: String, required: true }
     },

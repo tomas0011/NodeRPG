@@ -1,5 +1,5 @@
 import { Inventario } from "../Contenedor/Inventario";
-import IPersonaje from "./IPersonaje";
+import IPersonaje, { Recompensa } from "./IPersonaje";
 
 export default class PersonajeDecorador implements IPersonaje {
     portadorDeArmadura: IPersonaje ;
@@ -21,7 +21,15 @@ export default class PersonajeDecorador implements IPersonaje {
         return this.portadorDeArmadura.getOro();
     }
 
-    claseDeArmadura(): number { 
+    ganarOro(cantidad: number): number {
+        return this.portadorDeArmadura.ganarOro(cantidad);
+    }
+
+    getRecompensa(): Recompensa {
+        return this.portadorDeArmadura.getRecompensa();
+    }
+
+    claseDeArmadura(): number {
         return this.portadorDeArmadura.claseDeArmadura()
     }
 

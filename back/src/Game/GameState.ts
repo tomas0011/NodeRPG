@@ -48,6 +48,22 @@ export default class GameState {
     /** Jugador con los decoradores aplicados. Derivado de jugadorBase + equipados. */
     public jugador: IPersonaje;
 
+    /**
+     * Plata acumulada durante la run, pendiente de bancar al perfil al cerrarla.
+     * Su GENERACIÓN por combate/botín es 3c; aquí sólo se transfiere lo que haya.
+     */
+    public plataAcumulada: number = 0;
+
+    /**
+     * Flag de fin de run. Lo SETEAN los comandos (`abandonar`, `atacar` al
+     * detectar muerte); el CIERRE real (bankear/archivar/borrar) lo ejecuta el
+     * ciclo de sesión, manteniendo el motor sin dependencia de repositorios.
+     */
+    public terminada: boolean = false;
+
+    /** Causa del fin de run, si `terminada` es `true`. */
+    public causaFin?: 'muerte' | 'abandono';
+
     constructor(
         jugadorBase: PersonajeJugable,
         escenario: Escenario,
@@ -120,6 +136,19 @@ export default class GameState {
         this.equipados.splice(posicion, 1);
         this.rebuildDecoratedPlayer();
         return true;
+    }
+
+    /**
+     * Marca la run como terminada por la `causa` dada. Idempotente: si ya estaba
+     * terminada, conserva la primera causa registrada. Sólo cambia el flag; el
+     * cierre (bankear/archivar/borrar) lo hace el ciclo de sesión.
+     */
+    public terminar(causa: 'muerte' | 'abandono'): void {
+        if (this.terminada) {
+            return;
+        }
+        this.terminada = true;
+        this.causaFin = causa;
     }
 
     /** Busca un objeto del inventario del jugador por su nombre. */

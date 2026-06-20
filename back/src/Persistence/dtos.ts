@@ -40,6 +40,11 @@ export interface RunDTO {
     sessionId: string;
     schemaVersion: number;
     semilla: number;
+    /**
+     * Plata acumulada en la run, pendiente de bancar al perfil al cerrarla. Su
+     * generación por combate/botín es 3c; campo tolerante (default 0 si falta).
+     */
+    plataAcumulada: number;
     jugador: JugadorDTO;
     escenario: EscenarioDTO;
 }
@@ -63,6 +68,10 @@ export interface ResumenRun {
     nombre: string;
     salasVisitadas: number;
     oro: number;
+    /** Vida del jugador al cerrar la run (0 si murió). */
+    vidaActual?: number;
+    /** Plata bankeada al perfil al cerrar la run. */
+    plataBankeada?: number;
     /** Causa de cierre: muerte | abandono (lo dispara Fase 3). */
     causa?: string;
     terminadaEn: string;

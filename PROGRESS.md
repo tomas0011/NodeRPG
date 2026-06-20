@@ -28,7 +28,7 @@ Testeadores su veredicto.
 ## Estado actual
 
 - **Fecha de última actualización**: 2026-06-20
-- **Foco actual**: **Fase 2 HECHA ✅** — persistencia verificada contra Atlas real (smoke verde). Lista para F3.
+- **Foco actual**: **Fase 3 EN PROGRESO** — 3a ✅, 3b ✅, 3c ✅. Sigue **3d** (tiendas hub+en-run) o **3f** (salas/`mover`).
 - **Rama de trabajo**: `feat/new-tui-rpg` (el usuario partió de aquí; al terminar se mergea a `develop`).
 - **Bloqueos abiertos**: ninguno (la credencial de Atlas quedó resuelta por el usuario; conexión OK).
 - **Próximo paso global**: arrancar **Fase 3** (jugabilidad roguelike). Sugerido empezar por **3a** (`atacar` + Strategy de armas, solo depende de F1).
@@ -114,9 +114,9 @@ Testeadores su veredicto.
 
 | Sub | Qué | Depende |
 |-----|-----|---------|
-| 3a | `atacar` + Strategy de armas (Espada/Arco/Martillo, puños por defecto) | F1 |
-| 3b | Ciclo run: `crear`/morir/`abandonar` (bankeo + archivado + delete) | F2 |
-| 3c | Monedas: oro (run) + plata (perfil) | 3b |
+| 3a | `atacar` + Strategy de armas (Espada/Arco/Martillo, puños por defecto) | F1 | **HECHO ✅** |
+| 3b | Ciclo run: `crear`/morir/`abandonar` (bankeo + archivado + delete) | F2 | **HECHO ✅** |
+| 3c | Monedas: oro (run) + plata (perfil) | 3b | **HECHO ✅** |
 | 3d | Tiendas hub (plata) + en-run (oro), comando `comprar` | 3c |
 | 3e | Consumibles + Strategy de efectos (`usar`, `IEfecto`) | 3a |
 | 3f | Más salas/enemigos/NPCs + `mover`, catálogos/pools | F2 (`LugarFactory`) |
@@ -164,6 +164,13 @@ Testeadores su veredicto.
   La credencial de Atlas la corrigió el usuario.
 - **2026-06-20** — **F1 HECHA ✅**: `GameState`/`GameEngine`/`CommandResult`, des-singletonizado, equipo por ids,
   multi-sesión. Verificada por el Orquestador (build + 13/13 tests + lint + servidor + grep sin globales).
+- **2026-06-20** — **F3c ✅** (monedas oro/plata): botín del enemigo (`getRecompensa`), oro en la run / plata al perfil.
+  build+lint+52 tests; smoke Atlas verde (matar Cantinero→oro 15 en status→abandonar→plata 10 bankeada, oro perdido).
+  Nuevo comando `perfil` (hub) muestra la plata. Comando inválido ya devuelve `{"error":"<msg>"}`.
+- **2026-06-20** — **F3a ✅** (`atacar` + Strategy de armas) y **F3b ✅** (loop run crear/morir/abandonar). build+lint+45 tests;
+  smoke 3a (combate) y smoke 3b contra Atlas (crear→morir→archivar→hub) verdes. Bug encontrado por el smoke y corregido por
+  el Orquestador: `MongoProfileRepository.save` no limpiaba `runActivaId` en Atlas (`$set undefined` no borra → ahora `$unset`).
+  De paso, el comando inválido ya devuelve `{"error":"<mensaje>"}` (antes `{}`).
 - **2026-06-20** — Arranca **F1** (desacoplar Singletons/HTTP). Verificado de paso que `app/` buildea ✅.
 - **2026-06-20** — **F0 HECHA ✅**: tooling (TS5/jest/eslint/prettier) + 3 bugs corregidos. Verificada
   empíricamente por el Orquestador (build/test/lint/servidor verdes). 486 paquetes instalados en `back/`.

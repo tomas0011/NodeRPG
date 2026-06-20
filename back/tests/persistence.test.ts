@@ -173,29 +173,50 @@ describe('Multi-sesión a nivel repositorio', () => {
 });
 
 describe('SessionManager (caché write-through, repos InMemory)', () => {
-    it('resuelve perfil + run y persiste el equipo; recargar simulando reinicio lo recupera', async () => {
+    function nuevoSM() {
+        return new SessionManager(
+            new InMemoryProfileRepository(),
+            new InMemoryRunRepository(),
+            new InMemoryRunHistoryRepository()
+        );
+    }
+
+    it('resuelve en el hub (sin run activa) sin auto-crear run', async () => {
+        const sm = nuevoSM();
+        const sesion = await sm.resolver('hub-sesion');
+        expect(sesion.contexto.enHub()).toBe(true);
+        expect(sesion.contexto.state).toBeNull();
+        expect(sesion.profile.runActivaId).toBeUndefined();
+    });
+
+    it('crear inicia la run; persiste el equipo; recargar simulando reinicio lo recupera', async () => {
         const profileRepo = new InMemoryProfileRepository();
         const runRepo = new InMemoryRunRepository();
+        const historyRepo = new InMemoryRunHistoryRepository();
         const engine = new GameEngine();
 
-        // Primer "proceso": resuelve, juega, guarda.
-        const sm1 = new SessionManager(profileRepo, runRepo);
+        // Primer "proceso": hub → crear → juega → guarda.
+        const sm1 = new SessionManager(profileRepo, runRepo, historyRepo);
         const sesion1 = await sm1.resolver('mi-sesion');
-        engine.ejecutar('tomar:espada', sesion1.state);
-        engine.ejecutar('equipar:espada', sesion1.state);
+        engine.ejecutarSesion('crear', sesion1.contexto);
+        engine.ejecutarSesion('tomar:espada', sesion1.contexto);
+        engine.ejecutarSesion('equipar:espada', sesion1.contexto);
         await sm1.guardar(sesion1);
-        const golpeAntes = sesion1.state.jugador.dadoDeGolpe();
+        const state1 = sesion1.contexto.state!;
+        const golpeAntes = state1.jugador.dadoDeGolpe();
 
-        // Segundo "proceso": caché vacía, recarga desde los repos.
-        const sm2 = new SessionManager(profileRepo, runRepo);
+        // Segundo "proceso": caché vacía, recarga la run activa desde los repos.
+        const sm2 = new SessionManager(profileRepo, runRepo, historyRepo);
         const sesion2 = await sm2.resolver('mi-sesion');
-        expect(sesion2.state.equipados).toContain('espada');
-        expect(sesion2.state.jugador.dadoDeGolpe()).toBe(golpeAntes);
+        expect(sesion2.contexto.enHub()).toBe(false);
+        const state2 = sesion2.contexto.state!;
+        expect(state2.equipados).toContain('espada');
+        expect(state2.jugador.dadoDeGolpe()).toBe(golpeAntes);
         expect(sesion2.profile.runActivaId).toBe(sesion1.profile.runActivaId);
     });
 
     it('genera un sessionId si no llega ninguno', async () => {
-        const sm = new SessionManager(new InMemoryProfileRepository(), new InMemoryRunRepository());
+        const sm = nuevoSM();
         const sesion = await sm.resolver(undefined);
         expect(typeof sesion.sessionId).toBe('string');
         expect(sesion.sessionId.length).toBeGreaterThan(0);
@@ -204,8 +225,12 @@ describe('SessionManager (caché write-through, repos InMemory)', () => {
     it('el perfil sobrevive aunque se borre la run activa', async () => {
         const profileRepo = new InMemoryProfileRepository();
         const runRepo = new InMemoryRunRepository();
-        const sm = new SessionManager(profileRepo, runRepo);
+        const historyRepo = new InMemoryRunHistoryRepository();
+        const engine = new GameEngine();
+        const sm = new SessionManager(profileRepo, runRepo, historyRepo);
+
         const sesion = await sm.resolver('sesion-persistente');
+        engine.ejecutarSesion('crear', sesion.contexto);
         await sm.guardar(sesion);
         const runId = sesion.profile.runActivaId!;
 
@@ -214,5 +239,20 @@ describe('SessionManager (caché write-through, repos InMemory)', () => {
         const perfil = await profileRepo.load('sesion-persistente');
         expect(perfil).not.toBeNull();
         expect(perfil!.sessionId).toBe('sesion-persistente');
+    });
+
+    it('si el perfil apunta a una run inexistente, resolver cae al hub y desenlaza', async () => {
+        const profileRepo = new InMemoryProfileRepository();
+        const runRepo = new InMemoryRunRepository();
+        const historyRepo = new InMemoryRunHistoryRepository();
+        const sm = new SessionManager(profileRepo, runRepo, historyRepo);
+
+        const perfil = await profileRepo.create('huerfana');
+        perfil.runActivaId = 'run-que-no-existe';
+        await profileRepo.save(perfil);
+
+        const sesion = await sm.resolver('huerfana');
+        expect(sesion.contexto.enHub()).toBe(true);
+        expect(sesion.profile.runActivaId).toBeUndefined();
     });
 });

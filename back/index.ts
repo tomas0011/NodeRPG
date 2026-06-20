@@ -5,6 +5,7 @@ import GameEngine from './src/Game/GameEngine';
 import SessionManager from './src/Persistence/SessionManager';
 import MongoProfileRepository from './src/Persistence/MongoProfileRepository';
 import MongoRunRepository from './src/Persistence/MongoRunRepository';
+import MongoRunHistoryRepository from './src/Persistence/MongoRunHistoryRepository';
 import { conectarMongo } from './src/Persistence/mongo';
 
 const app = express();
@@ -16,7 +17,8 @@ const port = 3001;
 const engine = new GameEngine();
 const sessionManager = new SessionManager(
   new MongoProfileRepository(),
-  new MongoRunRepository()
+  new MongoRunRepository(),
+  new MongoRunHistoryRepository()
 );
 
 app.use(cors())
@@ -49,12 +51,20 @@ app.get('/command', async (req, res) => {
       throw new Error('Comando inválido')
     }
 
-    // Ciclo: resolver sessionId → cargar perfil (crear si no existe) → cargar
-    // run activa (crear si no hay) → ejecutar → guardar perfil/run → responder.
+    // Ciclo roguelike: resolver sessionId → cargar perfil (crear si no existe) →
+    // cargar run activa SÓLO si el perfil apunta a una (sin auto-crear; si no,
+    // queda en el hub) → ejecutar el comando sobre el contexto → si la run
+    // terminó (muerte/abandono) ejecutar el cierre (bankear/archivar/borrar/
+    // limpiar runActivaId) → guardar perfil/run → responder.
     const sessionIdEntrante = resolverSessionIdEntrante(req)
     const sesion = await sessionManager.resolver(sessionIdEntrante)
-    const resultado = engine.ejecutar(command, sesion.state)
+    const resultado = engine.ejecutarSesion(command, sesion.contexto)
+    await sessionManager.cerrarSiTermino(sesion.contexto)
     await sessionManager.guardar(sesion)
+
+    // Indica si el jugador está en el hub (sin run activa) o en una run, además
+    // del `content` humano (compat frontend).
+    const enHub = sesion.contexto.state === null
 
     // Devolvemos el sessionId resuelto (header y body) para que el cliente lo
     // persista si el servidor lo generó.
@@ -64,6 +74,7 @@ app.get('/command', async (req, res) => {
       sessionId: sesion.sessionId,
       content: resultado.message,
       ok: resultado.ok,
+      enHub,
       data: resultado.data,
       completions: resultado.completions
     });

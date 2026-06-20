@@ -38,6 +38,7 @@ function normalizar(doc: RunDTO): RunDTO {
         sessionId: doc.sessionId,
         schemaVersion: typeof doc.schemaVersion === 'number' ? doc.schemaVersion : 1,
         semilla: typeof doc.semilla === 'number' ? doc.semilla : 0,
+        plataAcumulada: typeof doc.plataAcumulada === 'number' ? doc.plataAcumulada : 0,
         jugador: {
             nombre: jugador.nombre || 'Tomas',
             vidaMaxima: typeof jugador.vidaMaxima === 'number' ? jugador.vidaMaxima : 10,

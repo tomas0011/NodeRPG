@@ -44,6 +44,7 @@ export default class GameStateMapper {
             sessionId: state.sessionId,
             schemaVersion: SCHEMA_VERSION,
             semilla: state.semilla,
+            plataAcumulada: state.plataAcumulada,
             jugador,
             escenario
         };
@@ -89,6 +90,9 @@ export default class GameStateMapper {
             lugarId,
             salasVisitadas.slice()
         );
+
+        // Plata acumulada (tolerante: docs viejos sin el campo caen a 0).
+        state.plataAcumulada = typeof dto.plataAcumulada === 'number' ? dto.plataAcumulada : 0;
 
         // Restaura el equipo y reconstruye la cadena de decoradores. Sólo se
         // conservan los ids cuyo objeto sigue en el inventario (consistencia).

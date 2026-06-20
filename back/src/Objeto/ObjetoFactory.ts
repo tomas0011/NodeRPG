@@ -1,5 +1,7 @@
 import { Objeto } from "./Objeto";
 import { Espada } from "./objetos/Espada";
+import { Arco } from "./objetos/Arco";
+import { Martillo } from "./objetos/Martillo";
 import { Taza } from "./objetos/Taza";
 import { ArmaduraDeCuero } from "./objetos/ArmaduraDeCuero";
 import { ArmaduraDePlacas } from "./objetos/ArmaduraDePlacas";
@@ -22,6 +24,8 @@ export default class ObjetoFactory {
     /** id (nombre del objeto) → constructor concreto. */
     private static readonly registro: Record<string, ConstructorDeObjeto> = {
         'espada': Espada,
+        'arco': Arco,
+        'martillo': Martillo,
         'taza': Taza,
         'armadura de cuero': ArmaduraDeCuero,
         'armadura de placas': ArmaduraDePlacas

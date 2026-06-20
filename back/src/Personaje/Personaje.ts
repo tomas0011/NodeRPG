@@ -1,5 +1,5 @@
 import { Inventario } from "../Contenedor/Inventario";
-import IPersonaje from "./IPersonaje";
+import IPersonaje, { Recompensa } from "./IPersonaje";
 
 export class Personaje implements IPersonaje {
     vidaMaxima: number
@@ -21,7 +21,28 @@ export class Personaje implements IPersonaje {
     getOro(): number {
         return this.oro;
     }
-    
+
+    /**
+     * Suma `cantidad` de oro (moneda de la run) a este personaje y devuelve el
+     * total. No acepta cantidades negativas (gastar oro es la tienda, 3d).
+     */
+    ganarOro(cantidad: number): number {
+        if (cantidad > 0) {
+            this.oro += cantidad;
+        }
+        return this.oro;
+    }
+
+    /**
+     * Botín de monedas que este personaje otorga al ser derrotado. Default sin
+     * recompensa; los enemigos lo sobrescriben con sus valores (patrón: el botín
+     * es comportamiento del enemigo, no un número fijo en `Atacar`). Determinista,
+     * sin azar.
+     */
+    getRecompensa(): Recompensa {
+        return { oro: 0, plata: 0 };
+    }
+
     claseDeArmadura(): number {
         return 10 + this.getDestreza();
     }

@@ -16,9 +16,21 @@ export default class MongoProfileRepository implements ProfileRepository {
     }
 
     public async save(profile: ProfileDTO): Promise<void> {
+        // `runActivaId` es opcional: cuando la run se cierra queda `undefined`.
+        // Un `$set` con `undefined` lo OMITE (mongoose no lo borra del doc), por lo
+        // que hay que usar `$unset` explícito para limpiarlo en Atlas; si no, el
+        // perfil quedaría apuntando a una run ya borrada (dato huérfano).
+        const { runActivaId, ...resto } = profile;
+        const set: Record<string, unknown> = { ...resto };
+        const update: Record<string, unknown> = { $set: set };
+        if (runActivaId) {
+            set.runActivaId = runActivaId;
+        } else {
+            update.$unset = { runActivaId: "" };
+        }
         await ProfileModel.updateOne(
             { sessionId: profile.sessionId },
-            { $set: profile },
+            update,
             { upsert: true }
         ).exec();
     }
