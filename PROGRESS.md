@@ -159,6 +159,14 @@ Testeadores su veredicto.
 
 ## Bitácora (lo más reciente arriba)
 
+- **2026-06-20** — **F4 UI nueva ✅ (build verde)**: frontend rehecho — theming medieval claro/oscuro (`ThemeContext` + `styles/temas.css`,
+  default oscuro), `GameContext` (fuente de verdad, conmuta hub/run por `enHub`, refresca paneles tras cada acción), `api/tipos.ts`,
+  `RequestManager.enviar()` tipado. **Hub completo** (`hub/`: histórico+detalle, crear, perfil/plata, tienda de mejoras). **Partida**
+  (`run/`: paneles ubicación/inventario/estado + consola con autocomplete desde `completions` + ayuda contextual). Consola vieja
+  eliminada. Verificado por el Orquestador: `CI=true npm run build` compila **sin warnings** (criterio de Vercel) — exit 0.
+  Pendiente: verificación visual del usuario + merge a `main` (rama que despliega Vercel).
+- **2026-06-20** — Backend ya operativo en Render + Vercel config (consola previa). CORS resuelto (era la barra final en `CORS_ORIGIN`).
+
 - **2026-06-20** — **F4 backend-deploy ✅** (Render): `index.ts` con `PORT`/`CORS_ORIGIN` por env (fallback dev) + `/health`
   (refleja estado mongoose, no tumba si Mongo cae); `Dockerfile` multi-stage Node 20-alpine, `.dockerignore`, `render.yaml`
   (runtime Docker, healthcheck `/health`, env vars `sync:false`), `Procfile`, `.env.example` extendido, script `start:prod`.

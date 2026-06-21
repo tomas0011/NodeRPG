@@ -1,0 +1,623 @@
+/*
+ * Theming medieval con CSS variables. Dos temas (oscuro por defecto, claro).
+ * Estética limpio-medieval: pergamino / tierra / oro viejo, bordes finos, sin
+ * texturas pesadas. El tema se conmuta con el atributo data-theme en <html>.
+ */
+
+:root,
+:root[data-theme='oscuro'] {
+  --fondo: #1a140f;
+  --fondo-panel: #221a13;
+  --fondo-panel-alt: #2b2118;
+  --fondo-consola: #14100b;
+  --texto: #e8dcc3;
+  --texto-tenue: #b6a888;
+  --texto-suave: #8c7d63;
+  --borde: #4a3a28;
+  --borde-fuerte: #6b5436;
+  --acento: #c9a227; /* oro viejo */
+  --acento-fuerte: #e3bc4a;
+  --acento-tenue: rgba(201, 162, 39, 0.18);
+  --peligro: #b3422f; /* burdeos / sangre */
+  --peligro-claro: #d96a55;
+  --vida: #7fae5a;
+  --vida-fondo: #34281c;
+  --sombra: rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme='claro'] {
+  --fondo: #ece0c8;
+  --fondo-panel: #f5ecd7;
+  --fondo-panel-alt: #efe3c8;
+  --fondo-consola: #f7f0df;
+  --texto: #3a2b18;
+  --texto-tenue: #6a543a;
+  --texto-suave: #8a7350;
+  --borde: #c9b58c;
+  --borde-fuerte: #a98f5f;
+  --acento: #9a6b1f; /* oro/ámbar oscuro para contraste sobre pergamino */
+  --acento-fuerte: #7a3b22; /* burdeos */
+  --acento-tenue: rgba(154, 107, 31, 0.16);
+  --peligro: #9a2f1c;
+  --peligro-claro: #c14a33;
+  --vida: #4f7a32;
+  --vida-fondo: #ddcfac;
+  --sombra: rgba(90, 70, 40, 0.25);
+}
+
+/* --- Reset / base ------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: var(--fondo);
+  color: var(--texto);
+  font-family: 'EB Garamond', 'Iowan Old Style', Georgia, serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+.titulo-medieval {
+  font-family: 'Cinzel', 'EB Garamond', Georgia, serif;
+  letter-spacing: 0.04em;
+  color: var(--acento-fuerte);
+  margin: 0 0 0.4em;
+}
+
+code,
+.mono {
+  font-family: 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+a {
+  color: var(--acento);
+}
+
+/* --- Componentes comunes ------------------------------------------------ */
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.cabecera-app {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--borde);
+  background-color: var(--fondo-panel);
+}
+
+.cabecera-app h1 {
+  font-size: 1.6rem;
+  margin: 0;
+}
+
+.boton {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: var(--texto);
+  background-color: var(--fondo-panel-alt);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: 4px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.boton:hover:not(:disabled) {
+  border-color: var(--acento);
+  color: var(--acento-fuerte);
+}
+
+.boton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.boton--primario {
+  background-color: var(--acento-tenue);
+  border-color: var(--acento);
+  color: var(--acento-fuerte);
+}
+
+.boton--primario:hover:not(:disabled) {
+  background-color: var(--acento);
+  color: var(--fondo);
+}
+
+.boton--peligro {
+  border-color: var(--peligro);
+  color: var(--peligro-claro);
+}
+
+.boton--peligro:hover:not(:disabled) {
+  background-color: var(--peligro);
+  color: #fff;
+}
+
+.boton--chip {
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  border-radius: 12px;
+}
+
+.panel {
+  background-color: var(--fondo-panel);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  padding: 16px;
+  box-shadow: 0 1px 4px var(--sombra);
+}
+
+.panel__titulo {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 1rem;
+  color: var(--acento);
+  border-bottom: 1px solid var(--borde);
+  padding-bottom: 8px;
+  margin: 0 0 12px;
+}
+
+.toggle-tema {
+  background: none;
+  border: 1px solid var(--borde-fuerte);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--acento-fuerte);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.toggle-tema:hover {
+  border-color: var(--acento);
+  background-color: var(--acento-tenue);
+}
+
+.texto-tenue {
+  color: var(--texto-tenue);
+}
+
+.texto-suave {
+  color: var(--texto-suave);
+}
+
+/* --- Hub ---------------------------------------------------------------- */
+
+.hub {
+  flex: 1;
+  padding: 24px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.hub__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 820px) {
+  .hub__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hub__ancho-completo {
+  grid-column: 1 / -1;
+}
+
+.perfil-cifra {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.perfil-cifra strong {
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 1.8rem;
+  color: var(--acento-fuerte);
+}
+
+.lista-mejoras {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lista-mejoras li {
+  background-color: var(--acento-tenue);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 0.82rem;
+}
+
+.lista-historial {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.run-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background-color: var(--fondo-panel-alt);
+  border: 1px solid var(--borde);
+  border-radius: 5px;
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  color: inherit;
+  font-family: inherit;
+}
+
+.run-item:hover {
+  border-color: var(--acento);
+}
+
+.run-item__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.run-item__nombre {
+  font-family: 'Cinzel', Georgia, serif;
+  color: var(--texto);
+}
+
+.etiqueta-causa {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+}
+
+.etiqueta-causa--muerte {
+  color: var(--peligro-claro);
+  border-color: var(--peligro);
+}
+
+.etiqueta-causa--abandono {
+  color: var(--texto-tenue);
+}
+
+.tienda-articulo {
+  border: 1px solid var(--borde);
+  border-radius: 5px;
+  padding: 12px;
+  background-color: var(--fondo-panel-alt);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tienda-articulo__cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tienda-articulo__costo {
+  color: var(--acento);
+  font-family: 'Cinzel', Georgia, serif;
+  white-space: nowrap;
+}
+
+.grilla-articulos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+/* --- Modal -------------------------------------------------------------- */
+
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.modal {
+  background-color: var(--fondo-panel);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 28px var(--sombra);
+}
+
+.modal__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.detalle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 18px;
+  margin: 8px 0;
+}
+
+.detalle-grid dt {
+  color: var(--texto-tenue);
+  font-size: 0.85rem;
+}
+
+.detalle-grid dd {
+  margin: 0;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* --- Partida (run) ------------------------------------------------------ */
+
+.run {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
+  padding: 16px 24px;
+  align-items: start;
+  max-width: 1300px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .run {
+    grid-template-columns: 1fr;
+  }
+}
+
+.run__paneles {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.run__consola {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+.barra-estado {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.barra-vida {
+  height: 16px;
+  background-color: var(--vida-fondo);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.barra-vida__relleno {
+  height: 100%;
+  background-color: var(--vida);
+  transition: width 0.3s ease;
+}
+
+.barra-xp {
+  height: 8px;
+  background-color: var(--vida-fondo);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.barra-xp__relleno {
+  height: 100%;
+  background-color: var(--acento);
+  transition: width 0.3s ease;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 14px;
+  font-size: 0.88rem;
+}
+
+.stats-grid span:nth-child(odd) {
+  color: var(--texto-tenue);
+}
+
+.salidas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lista-entidades {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lista-entidades li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.consola {
+  display: flex;
+  flex-direction: column;
+  height: 60vh;
+  min-height: 360px;
+  background-color: var(--fondo-consola);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.consola__log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.consola__linea {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.consola__linea--comando {
+  color: var(--acento-fuerte);
+}
+
+.consola__linea--error {
+  color: var(--peligro-claro);
+}
+
+.consola__linea--sistema {
+  color: var(--texto-suave);
+  font-style: italic;
+}
+
+.consola__entrada {
+  position: relative;
+  border-top: 1px solid var(--borde);
+  display: flex;
+  align-items: center;
+  background-color: var(--fondo-panel);
+}
+
+.consola__prompt {
+  padding-left: 12px;
+  color: var(--acento);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.consola__input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--texto);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.9rem;
+  padding: 12px;
+}
+
+.autocomplete {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--fondo-panel);
+  border: 1px solid var(--borde-fuerte);
+  border-bottom: none;
+  max-height: 200px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  z-index: 10;
+}
+
+.autocomplete__item {
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.85rem;
+}
+
+.autocomplete__item--activo {
+  background-color: var(--acento-tenue);
+  color: var(--acento-fuerte);
+}
+
+.panel-ayuda dl {
+  margin: 0;
+}
+
+.panel-ayuda dt {
+  font-family: 'Cinzel', Georgia, serif;
+  color: var(--acento);
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.panel-ayuda dd {
+  margin: 0 0 0 0;
+  color: var(--texto-tenue);
+  font-size: 0.85rem;
+}
+
+.fila-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.cargando {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', Georgia, serif;
+  color: var(--acento);
+}
