@@ -27,7 +27,7 @@ Testeadores su veredicto.
 
 ## Estado actual
 
-- **Fecha de última actualización**: 2026-06-20
+- **Fecha de última actualización**: 2026-06-21
 - **Foco actual**: **F4** — backend-deploy (Render) ✅ + **config Vercel** ✅ (`RequestManager` por `REACT_APP_API_URL`, `vercel.json`, `.env.example`). Despliega la **consola actual**; la **UI nueva** (hub web + TUI) sigue pendiente.
 - **Rama de trabajo**: `feat/new-tui-rpg` (el usuario partió de aquí; al terminar se mergea a `develop`).
 - **Bloqueos abiertos**: ninguno (la credencial de Atlas quedó resuelta por el usuario; conexión OK).
@@ -159,6 +159,7 @@ Testeadores su veredicto.
 
 ## Bitácora (lo más reciente arriba)
 
+- **2026-06-21** — **F4 UI ajuste TUI ✅**: en `app/` la pantalla de `Run` ahora arranca con el TUI auxiliar oculto por defecto y deja la consola como superficie principal. Se agregó un botón en cabecera para **Desplegar TUI** / **Minimizar TUI**; al desplegar, reaparecen paneles de estado/ubicación/inventario y ayuda contextual. Sin cambios en `back/` ni en el contrato con `/command`. Verificado por el Orquestador: `app/` `npm run build` ✅.
 - **2026-06-20** — **F4 UI nueva ✅ (build verde)**: frontend rehecho — theming medieval claro/oscuro (`ThemeContext` + `styles/temas.css`,
   default oscuro), `GameContext` (fuente de verdad, conmuta hub/run por `enHub`, refresca paneles tras cada acción), `api/tipos.ts`,
   `RequestManager.enviar()` tipado. **Hub completo** (`hub/`: histórico+detalle, crear, perfil/plata, tienda de mejoras). **Partida**
