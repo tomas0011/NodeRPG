@@ -407,6 +407,10 @@ a {
   margin: 0 auto;
 }
 
+.run--tui-oculto {
+  grid-template-columns: 1fr;
+}
+
 @media (max-width: 900px) {
   .run {
     grid-template-columns: 1fr;
