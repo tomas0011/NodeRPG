@@ -2,8 +2,9 @@ import CommandResult from '../../Game/CommandResult';
 import GameState from '../../Game/GameState';
 import { Objeto } from '../../Objeto/Objeto';
 import ObjetoFactory from '../../Objeto/ObjetoFactory';
-import { Personaje } from '../../Personaje/Personaje';
 import type { ResultadoXp } from '../../Personaje/IPersonaje';
+import { Personaje } from '../../Personaje/Personaje';
+import CatalogoOcupantes from '../../Personaje/pools/CatalogoOcupantes';
 import CurvaDeNivel from '../../Personaje/CurvaDeNivel';
 import type ILugar from '../../Escenario/Lugar/ILugar';
 import type { IEstrategiaDeAtaque } from '../../Objeto/estrategias/IEstrategiaDeAtaque';
@@ -19,14 +20,14 @@ import IComando from '../IComando';
  * puños por defecto.
  *
  * **Orden del turno (determinista):** primero golpea el jugador; **si el golpe
- * mata al NPC, se cobra su botín** — monedas (`getRecompensa()`: `oro` a la run /
+ * mata al NPC, se cobra su botín** - monedas (`getRecompensa()`: `oro` a la run /
  * `plata` a `state.plataAcumulada`) **y objetos encontrables** (`getBotin()`: ids
  * instanciados vía `ObjetoFactory` y **soltados en la sala actual** para que el
  * jugador los recoja con `tomar`, 3g). Sólo si el NPC sobrevive **contraataca**
  * de forma determinista (sin azar): resta a la vida del jugador su `dadoDeGolpe()`
  * mitigado por la `claseDeArmadura()` del jugador. Si tras el intercambio el
  * jugador queda con vida <= 0, la run se marca **terminada por muerte** (sólo se
- * setea el flag; el cierre real lo hace el ciclo de sesión) — el botín ya
+ * setea el flag; el cierre real lo hace el ciclo de sesión) - el botín ya
  * otorgado se conserva.
  *
  * El botín es **comportamiento del enemigo** (`getRecompensa()`/`getBotin()`), no
@@ -36,14 +37,12 @@ import IComando from '../IComando';
  * distinto de los **comprables** del hub (plata) y de la tienda en-run (oro): NO
  * usan los catálogos de tienda.
  *
- * **Dónde cae el loot y persistencia (3g):** los objetos del botín caen al
- * **suelo de la sala actual** (refuerza el loop `tomar`/exploración). Lo que el
- * jugador **toma** entra al inventario y **persiste** (el inventario se serializa
- * en el DTO de la run). El loot del **suelo** es **efímero**: la sala se
- * reconstruye por `lugarId` desde el `MapaLayout` (no se serializa entera), así
- * que el loot soltado y NO tomado se pierde al recargar — comportamiento honesto
- * y documentado; 3h lo hará determinista por semilla. No hay inconsistencia
- * silenciosa: para conservar loot, hay que `tomar`-lo.
+ * **Dónde cae el loot y persistencia:** los objetos del botín caen al **suelo
+ * de la sala actual** (refuerza el loop `tomar`/exploración) y, además del
+ * lugar vivo, se registran en `state.estadoMutablePorSala[lugarId]` como
+ * `objetosAgregadosAlSuelo`. Así, el loot soltado y **no tomado** reaparece al
+ * reconstruir la sala por `lugarId` o al rehidratar la run; lo que el jugador
+ * **toma** sigue persistiendo vía inventario serializado.
  */
 export default class Atacar implements IComando {
     getKey() {
@@ -74,7 +73,7 @@ export default class Atacar implements IComando {
 
         // Botín del enemigo: si el golpe del jugador lo mata, se cobra ANTES del
         // contraataque (el botín se otorga por el golpe que mató al NPC, aunque
-        // el contraataque ya no ocurra). El oro va a la run (jugador → DTO) y la
+        // el contraataque ya no ocurra). El oro va a la run (jugador -> DTO) y la
         // plata a `plataAcumulada` (a bancar al perfil al cerrar la run, 3b).
         let oroGanado = 0;
         let plataGanada = 0;
@@ -83,6 +82,7 @@ export default class Atacar implements IComando {
         // de nivel (puede subir varios) aumentando vidaMaxima/destreza.
         let resultadoXp: ResultadoXp | undefined;
         if (murioNpc) {
+            this.registrarOcupanteEliminado(objetivo, lugar, state);
             const recompensa = objetivo.getRecompensa();
             oroGanado = Math.max(0, recompensa.oro);
             plataGanada = Math.max(0, recompensa.plata);
@@ -94,7 +94,7 @@ export default class Atacar implements IComando {
             // Loot encontrable: instanciar los ids de getBotin() vía ObjetoFactory
             // y soltarlos en el suelo de la sala actual (el jugador los recoge con
             // `tomar`). Objetos, no monedas; no usa los catálogos de tienda.
-            botinSoltado = this.soltarBotin(objetivo, lugar);
+            botinSoltado = this.soltarBotin(objetivo, lugar, state);
         }
 
         // Contraataque determinista: sólo si el NPC sigue vivo, golpea al jugador.
@@ -245,22 +245,46 @@ export default class Atacar implements IComando {
 
     /**
      * Instancia el botín de objetos del NPC derrotado (`getBotin()`) vía
-     * `ObjetoFactory` y lo **suelta en el suelo de la sala actual** (lo agrega al
-     * array de objetos del lugar, donde `tomar` lo encuentra). Determinista: el
-     * loot es fijo por enemigo (sin azar; 3h lo sembrará). Los ids inválidos se
-     * ignoran (tolerante). Devuelve los ids realmente soltados.
+     * `ObjetoFactory` y lo **suelta en el suelo de la sala actual**. Además de
+     * agregarlo al array vivo del lugar, lo registra en el delta mutable de la
+     * sala actual para que sobreviva a reconstrucciones por `lugarId`.
+     * Determinista: el loot es fijo por enemigo (sin azar; 3h lo sembrará). Los
+     * ids inválidos se ignoran (tolerante). Devuelve los ids realmente soltados.
      */
-    private soltarBotin(npc: Personaje, lugar: ILugar): string[] {
+    private soltarBotin(npc: Personaje, lugar: ILugar, state: GameState): string[] {
         const objetosDelLugar = lugar.getObjetos();
+        const estadoMutable = state.obtenerEstadoMutableDeSala(state.lugarId);
         const soltados: string[] = [];
         for (const id of npc.getBotin()) {
             const objeto = ObjetoFactory.crear(id);
             if (objeto) {
+                const nombre = objeto.getNombre();
                 objetosDelLugar.push(objeto);
-                soltados.push(objeto.getNombre());
+                estadoMutable.objetosAgregadosAlSuelo.push(nombre);
+                soltados.push(nombre);
             }
         }
         return soltados;
+    }
+
+    /**
+     * Registra que este ocupante ya fue eliminado de la sala actual y alinea la
+     * instancia viva en memoria con ese delta persistido.
+     */
+    private registrarOcupanteEliminado(npc: Personaje, lugar: ILugar, state: GameState): void {
+        const ocupantes = lugar.getPersonajes();
+        const indice = ocupantes.indexOf(npc);
+        if (indice !== -1) {
+            ocupantes.splice(indice, 1);
+        }
+
+        const ocupanteId = CatalogoOcupantes.resolverId(npc);
+        if (!ocupanteId) {
+            return;
+        }
+
+        const estadoMutable = state.obtenerEstadoMutableDeSala(state.lugarId);
+        estadoMutable.ocupantesEliminados.push(ocupanteId);
     }
 
     /** Busca un NPC vivo de la sala por su nombre. */

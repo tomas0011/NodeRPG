@@ -1,12 +1,12 @@
+import { Escenario } from '../src/Escenario/Escenario';
+import LugarFactory from '../src/Escenario/LugarFactory';
+import MapaLayout from '../src/Escenario/MapaLayout';
 import GameEngine from '../src/Game/GameEngine';
 import GameState from '../src/Game/GameState';
 import crearGameState from '../src/Game/crearGameState';
-import LugarFactory from '../src/Escenario/LugarFactory';
-import MapaLayout from '../src/Escenario/MapaLayout';
-import { Escenario } from '../src/Escenario/Escenario';
 import GameStateMapper from '../src/Persistence/GameStateMapper';
 
-describe('mover (3f) — salidas y desplazamiento', () => {
+describe('mover (3f) - salidas y desplazamiento', () => {
     let engine: GameEngine;
     let state: GameState;
 
@@ -86,8 +86,8 @@ describe('mover (3f) — salidas y desplazamiento', () => {
 
         // El Ogro es un jefe (vida 30, golpe 9): un jugador sin equipo no lo mata.
         // Lo que verifica este test es que el Ogro es ATACABLE y que, al morir, da su
-        // recompensa — no el balance del combate. Lo dejamos a 1 de vida y lo rematamos
-        // de un golpe (puños hace ≥1 ignorando armadura), de forma determinista.
+        // recompensa - no el balance del combate. Lo dejamos a 1 de vida y lo rematamos
+        // de un golpe (puños hace >=1 ignorando armadura), de forma determinista.
         const ogro = state.escenario.getLugar().getPersonajes().find((p) => p.getNombre() === 'Ogro');
         expect(ogro).toBeDefined();
         ogro!.recibirDaño(ogro!.getVidaActual() - 1); // queda en 1 de vida
@@ -102,11 +102,11 @@ describe('mover (3f) — salidas y desplazamiento', () => {
     });
 });
 
-describe('LugarFactory + MapaLayout — reconstrucción por lugarId', () => {
+describe('LugarFactory + MapaLayout - reconstrucción por lugarId', () => {
     it('reconstruye cada sala del mapa con su nombre, ocupantes y salidas', () => {
         const esperado: Record<string, { nombre: string; ocupante?: string }> = {
-            'bar': { nombre: 'Bar Puerco Verde', ocupante: 'Cantinero Pepe' },
-            'pasillo': { nombre: 'Pasillo lúgubre', ocupante: 'Rata' },
+            bar: { nombre: 'Bar Puerco Verde', ocupante: 'Cantinero Pepe' },
+            pasillo: { nombre: 'Pasillo lúgubre', ocupante: 'Rata' },
             'sala-combate': { nombre: 'Sala de combate', ocupante: 'Bandido' },
             'sala-descanso': { nombre: 'Sala de descanso' },
             'sala-tienda': { nombre: 'Tienda del mercader' },
@@ -134,6 +134,23 @@ describe('LugarFactory + MapaLayout — reconstrucción por lugarId', () => {
     it('un lugarId desconocido cae al bar (carga tolerante)', () => {
         const lugar = LugarFactory.crear('inexistente');
         expect(lugar.getNombre()).toBe('Bar Puerco Verde');
+    });
+
+    it('aplica el delta mutable de la sala al reconstruir por lugarId', () => {
+        const lugar = LugarFactory.crear('bar', 0, {
+            bar: {
+                objetosTomados: ['espada'],
+                objetosAgregadosAlSuelo: ['martillo'],
+                ocupantesEliminados: ['cantinero']
+            }
+        });
+
+        expect(lugar.getObjetos().map((objeto) => objeto.getNombre())).toEqual([
+            'taza',
+            'armadura de cuero',
+            'martillo'
+        ]);
+        expect(lugar.getPersonajes()).toEqual([]);
     });
 
     it('cada sala destino del layout existe en el mapa (grafo consistente)', () => {
@@ -187,6 +204,65 @@ describe('Round-trip con el jugador en una sala distinta del bar', () => {
         expect(ataque.ok).toBe(true);
         const data = ataque.data as { objetivo: string };
         expect(data.objetivo).toBe('Rata');
+    });
+
+    it('mover reconstruye la sala destino usando el delta mutable persistido de la run', () => {
+        const engine = new GameEngine();
+        const state = crearGameState('sesion-delta-mover', 'run-delta-mover', 0);
+        state.estadoMutablePorSala['pasillo'] = {
+            objetosTomados: [],
+            objetosAgregadosAlSuelo: ['taza'],
+            ocupantesEliminados: ['rata']
+        };
+
+        const resultado = engine.ejecutar('mover:este', state);
+
+        expect(resultado.ok).toBe(true);
+        expect(state.escenario.getLugar().getPersonajes()).toEqual([]);
+        expect(state.escenario.getLugar().getObjetos().map((objeto) => objeto.getNombre())).toEqual(['taza']);
+    });
+
+    it('al derrotar un ocupante se registra en ocupantesEliminados y no reaparece al volver', () => {
+        const engine = new GameEngine();
+        const state = crearGameState('sesion-ocupante', 'run-ocupante', 0);
+        const cantinero = state.escenario
+            .getLugar()
+            .getPersonajes()
+            .find((p) => p.getNombre() === 'Cantinero Pepe');
+
+        expect(cantinero).toBeDefined();
+        cantinero!.recibirDaño(cantinero!.getVidaActual() - 1);
+
+        const ataque = engine.ejecutar('atacar:Cantinero Pepe', state);
+
+        expect(ataque.ok).toBe(true);
+        expect(state.obtenerEstadoMutableDeSala('bar').ocupantesEliminados).toEqual(['cantinero']);
+        expect(state.escenario.getLugar().getPersonajes()).toEqual([]);
+
+        engine.ejecutar('mover:este', state);
+        engine.ejecutar('mover:oeste', state);
+
+        expect(state.lugarId).toBe('bar');
+        expect(state.escenario.getLugar().getPersonajes()).toEqual([]);
+    });
+
+    it('el round-trip mantiene ausente al ocupante derrotado al reconstruir la sala', () => {
+        const engine = new GameEngine();
+        const state = crearGameState('sesion-ocupante-rt', 'run-ocupante-rt', 0);
+        const cantinero = state.escenario
+            .getLugar()
+            .getPersonajes()
+            .find((p) => p.getNombre() === 'Cantinero Pepe');
+
+        expect(cantinero).toBeDefined();
+        cantinero!.recibirDaño(cantinero!.getVidaActual() - 1);
+        engine.ejecutar('atacar:Cantinero Pepe', state);
+
+        const recargado = GameStateMapper.fromDTO(GameStateMapper.toDTO(state));
+
+        expect(recargado.lugarId).toBe('bar');
+        expect(recargado.estadoMutablePorSala['bar'].ocupantesEliminados).toEqual(['cantinero']);
+        expect(recargado.escenario.getLugar().getPersonajes()).toEqual([]);
     });
 });
 

@@ -90,6 +90,27 @@ describe('Round-trip toDTO → fromDTO (serialización sin pérdida)', () => {
         expect(state.salasVisitadas).toEqual([]);
         expect(state.jugador.dadoDeGolpe()).toBe(6); // espada reconstruida y equipada
     });
+
+    it('persiste y reconstruye el estado mutable por sala sin perder el delta', () => {
+        const state = crearGameState('sesion-salas', 'run-salas', 0);
+        state.estadoMutablePorSala['bar'] = {
+            objetosTomados: ['espada'],
+            objetosAgregadosAlSuelo: ['martillo'],
+            ocupantesEliminados: ['cantinero']
+        };
+
+        const dto = GameStateMapper.toDTO(state);
+        expect(dto.escenario.estadoMutablePorSala).toEqual(state.estadoMutablePorSala);
+
+        const reconstruido = GameStateMapper.fromDTO(dto);
+        expect(reconstruido.estadoMutablePorSala).toEqual(state.estadoMutablePorSala);
+        expect(reconstruido.escenario.getLugar().getObjetos().map((o) => o.getNombre())).toEqual([
+            'taza',
+            'armadura de cuero',
+            'martillo'
+        ]);
+        expect(reconstruido.escenario.getLugar().getPersonajes()).toEqual([]);
+    });
 });
 
 describe('Separación de agregados y ciclos de vida', () => {

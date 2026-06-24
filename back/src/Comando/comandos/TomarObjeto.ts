@@ -23,6 +23,7 @@ class TomarObjeto implements IComando {
         if (posicion !== -1) {
             objetosDelLugar.splice(posicion, 1)
         }
+        state.registrarObjetoTomadoDelLugarActual(objetoEncontrado.getNombre())
         const inventario = state.jugadorBase.getInventario().getObjetos().map((objeto) => objeto.getNombre());
         return {
             ok: true,

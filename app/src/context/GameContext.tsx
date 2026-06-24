@@ -155,17 +155,20 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       agregarMensaje('comando', `> ${limpio}`);
       try {
         const resp = await rm.enviar(limpio);
+        const proximoEnHub = typeof resp.enHub === 'boolean' ? resp.enHub : enHub;
         agregarMensaje(resp.ok ? 'respuesta' : 'error', resp.content);
         aplicarData(resp);
         fusionarCompletions(resp.completions);
-        setEnHub(resp.enHub);
+        if (typeof resp.enHub === 'boolean') {
+          setEnHub(resp.enHub);
+        }
 
         // Refresco automático de paneles tras cada comando:
         //  - si la run terminó o caímos al hub, refrescamos el hub;
         //  - si seguimos en partida, re-pedimos status + escenario.
-        if (resp.enHub || runTerminada(resp.data)) {
+        if (resp.ok && (resp.enHub || runTerminada(resp.data))) {
           await refrescarHub();
-        } else if (resp.ok) {
+        } else if (resp.ok && !proximoEnHub) {
           await refrescarRun();
         }
         return resp;
@@ -188,7 +191,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       }
       aplicarData(resp);
       fusionarCompletions(resp.completions);
-      setEnHub(resp.enHub);
+      if (typeof resp.enHub === 'boolean') {
+        setEnHub(resp.enHub);
+      }
+      if (!resp.ok) {
+        agregarMensaje('error', resp.content);
+        setCargando(false);
+        return;
+      }
       if (resp.enHub) {
         agregarMensaje('sistema', 'Bienvenido al hub. Crea una partida para empezar.');
         await refrescarSilencioso('historial');
