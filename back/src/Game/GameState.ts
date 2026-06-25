@@ -1,6 +1,7 @@
 import { Escenario } from "../Escenario/Escenario";
 import ILugar from "../Escenario/Lugar/ILugar";
 import LugarFactory from "../Escenario/LugarFactory";
+import { resolverValorCanonico } from "../Input/normalizarEntrada";
 import { Objeto } from "../Objeto/Objeto";
 import IPersonaje from "../Personaje/IPersonaje";
 import { Personaje } from "../Personaje/Personaje";
@@ -169,8 +170,9 @@ export default class GameState {
         if (!objeto.getModificacion()) {
             return false;
         }
-        if (!this.equipados.includes(id)) {
-            this.equipados.push(id);
+        const idCanonico = objeto.getNombre();
+        if (!this.equipados.includes(idCanonico)) {
+            this.equipados.push(idCanonico);
         }
         this.rebuildDecoratedPlayer();
         return true;
@@ -180,7 +182,12 @@ export default class GameState {
      * Desequipa el ítem `id`. Devuelve `true` si estaba equipado y se quitó.
      */
     public desequipar(id: string): boolean {
-        const posicion = this.equipados.indexOf(id);
+        const idCanonico = resolverValorCanonico(id, this.equipados, (equipado: string) => equipado);
+        if (!idCanonico) {
+            return false;
+        }
+
+        const posicion = this.equipados.indexOf(idCanonico);
         if (posicion === -1) {
             return false;
         }
@@ -204,10 +211,11 @@ export default class GameState {
 
     /** Busca un objeto del inventario del jugador por su nombre. */
     private buscarObjetoEquipado(id: string): Objeto | undefined {
-        return this.jugadorBase
-            .getInventario()
-            .getObjetos()
-            .find((objeto: Objeto) => objeto.getNombre() === id);
+        return resolverValorCanonico(
+            id,
+            this.jugadorBase.getInventario().getObjetos(),
+            (objeto: Objeto) => objeto.getNombre()
+        );
     }
 
     /**

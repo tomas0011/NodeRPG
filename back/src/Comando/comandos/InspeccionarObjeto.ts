@@ -1,5 +1,6 @@
 import CommandResult from '../../Game/CommandResult';
 import GameState from '../../Game/GameState';
+import { resolverValorCanonico } from '../../Input/normalizarEntrada';
 import { Objeto } from '../../Objeto/Objeto';
 import IComando from '../IComando';
 
@@ -14,7 +15,11 @@ class InspeccionarObjeto implements IComando {
 
     ejecutar(nombreDeObjeto: string, state: GameState): CommandResult {
         const inventario = state.jugadorBase.getInventario().getObjetos();
-        const objetoEncontrado = inventario.find((objeto: Objeto) => objeto.getNombre() === nombreDeObjeto);
+        const objetoEncontrado = resolverValorCanonico(
+            nombreDeObjeto,
+            inventario,
+            (objeto: Objeto) => objeto.getNombre()
+        );
         const completions = { inspeccionar: inventario.map((objeto: Objeto) => objeto.getNombre()) };
 
         if (!objetoEncontrado) {

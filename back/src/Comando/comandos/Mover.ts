@@ -1,5 +1,6 @@
 import CommandResult from '../../Game/CommandResult';
 import GameState from '../../Game/GameState';
+import { resolverClaveCanonica } from '../../Input/normalizarEntrada';
 import IComando from '../IComando';
 
 /**
@@ -33,7 +34,8 @@ export default class Mover implements IComando {
         const salidas = lugarActual.getSalidas();
         const direcciones = Object.keys(salidas);
 
-        const destinoId = salida ? salidas[salida] : undefined;
+        const salidaCanonica = salida ? resolverClaveCanonica(salida, salidas) : undefined;
+        const destinoId = salidaCanonica ? salidas[salidaCanonica] : undefined;
         if (!destinoId) {
             return {
                 ok: false,

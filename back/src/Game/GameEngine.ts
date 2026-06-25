@@ -19,6 +19,7 @@ import {
     TomarObjeto,
     UsarObjeto
 } from "../Comando";
+import { resolverValorCanonico } from "../Input/normalizarEntrada";
 import CommandResult from "./CommandResult";
 import GameState from "./GameState";
 import SesionContexto from "./SesionContexto";
@@ -153,11 +154,11 @@ export default class GameEngine {
     }
 
     private getComando(comando: string): IComando | undefined {
-        return this.comandos.find((c: IComando) => c.esComando(comando));
+        return resolverValorCanonico(comando, this.comandos, (c: IComando) => c.getKey());
     }
 
     private getComandoSesion(comando: string): IComandoSesion | undefined {
-        return this.comandosSesion.find((c: IComandoSesion) => c.esComando(comando));
+        return resolverValorCanonico(comando, this.comandosSesion, (c: IComandoSesion) => c.getKey());
     }
 
     /** Ayudas de todos los comandos (juego + sesión), para el `GetHelp`. */
@@ -228,7 +229,9 @@ export default class GameEngine {
     }
 
     private parsear(input: string): [string, string] {
-        const [comando, agente] = input.split(':').map((fragmento: string) => fragmento.trim());
+        const fragmentos = input.split(':');
+        const comando = (fragmentos[0] || '').trim();
+        const agente = fragmentos.slice(1).join(':').trim();
         return [comando, agente];
     }
 }

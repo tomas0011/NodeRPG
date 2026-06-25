@@ -23,6 +23,15 @@ describe('GameEngine (sin HTTP ni globales)', () => {
         expect(state.jugador.dadoDeGolpe()).toBe(4);
     });
 
+    it('ejecutar acepta comandos y nombres de objeto sin distinguir mayúsculas', () => {
+        const resultado = engine.ejecutar('ToMaR:EsPaDa', state);
+        const inventario = state.jugadorBase.getInventario().getObjetos().map((o) => o.getNombre());
+
+        expect(resultado.ok).toBe(true);
+        expect(resultado.message).toContain('"espada"');
+        expect(inventario).toContain('espada');
+    });
+
     it('escenario devuelve ok y completions de tomar', () => {
         const resultado = engine.ejecutar('escenario', state);
         expect(resultado.ok).toBe(true);
@@ -267,5 +276,23 @@ describe('GameEngine - help en el ciclo de sesión', () => {
         expect(resultado.message).toContain('Comandos disponibles:');
         expect(resultado.message).toContain('- crear: Inicia una nueva run desde el hub.');
         expect(resultado.message).toContain('- tienda: Lista la tienda disponible en el contexto actual, sea hub o run.');
+    });
+
+    it('ejecutarSesion acepta comandos y salidas con mayúsculas arbitrarias', () => {
+        const engine = new GameEngine();
+        const profile: ProfileDTO = {
+            sessionId: 'sesion-run',
+            schemaVersion: 2,
+            plata: 0,
+            mejoras: []
+        };
+        const contexto = new SesionContexto(profile, null, () => crearGameState('sesion-run'));
+
+        const crear = engine.ejecutarSesion('CrEaR', contexto);
+        const mover = engine.ejecutarSesion('MoVeR:EsTe', contexto);
+
+        expect(crear.ok).toBe(true);
+        expect(mover.ok).toBe(true);
+        expect(contexto.state!.lugarId).toBe('pasillo');
     });
 });

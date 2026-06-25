@@ -1,5 +1,6 @@
 import CommandResult from '../../Game/CommandResult';
 import GameState from '../../Game/GameState';
+import { resolverValorCanonico } from '../../Input/normalizarEntrada';
 import { Objeto } from '../../Objeto/Objeto';
 import IComando from '../IComando';
 
@@ -14,7 +15,11 @@ class TomarObjeto implements IComando {
 
     ejecutar(nombreDeObjeto: string, state: GameState): CommandResult {
         const objetosDelLugar = state.escenario.getLugar().getObjetos()
-        const objetoEncontrado = objetosDelLugar.find((objeto: Objeto) => objeto.getNombre() === nombreDeObjeto)
+        const objetoEncontrado = resolverValorCanonico(
+            nombreDeObjeto,
+            objetosDelLugar,
+            (objeto: Objeto) => objeto.getNombre()
+        )
         if (!objetoEncontrado) {
             return { ok: false, message: 'No se encuentra el objeto' };
         }

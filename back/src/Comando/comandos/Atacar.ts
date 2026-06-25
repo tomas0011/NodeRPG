@@ -9,6 +9,7 @@ import CurvaDeNivel from '../../Personaje/CurvaDeNivel';
 import type ILugar from '../../Escenario/Lugar/ILugar';
 import type { IEstrategiaDeAtaque } from '../../Objeto/estrategias/IEstrategiaDeAtaque';
 import PunosStrategy from '../../Objeto/estrategias/PunosStrategy';
+import { resolverValorCanonico } from '../../Input/normalizarEntrada';
 import IComando from '../IComando';
 
 /**
@@ -289,8 +290,10 @@ export default class Atacar implements IComando {
 
     /** Busca un NPC vivo de la sala por su nombre. */
     private buscarNpc(personajes: Personaje[], nombre: string): Personaje | undefined {
-        return personajes.find(
-            (personaje) => personaje.getNombre() === nombre && personaje.getVidaActual() > 0
+        return resolverValorCanonico(
+            nombre,
+            personajes.filter((personaje) => personaje.getVidaActual() > 0),
+            (personaje) => personaje.getNombre()
         );
     }
 

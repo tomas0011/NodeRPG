@@ -39,6 +39,13 @@ describe('mover (3f) - salidas y desplazamiento', () => {
         );
     });
 
+    it('mover resuelve salidas sin distinguir mayúsculas', () => {
+        const resultado = engine.ejecutar('mOvEr:EsTe', state);
+
+        expect(resultado.ok).toBe(true);
+        expect(state.lugarId).toBe('pasillo');
+    });
+
     it('mover por una salida inválida devuelve ok:false con las salidas válidas y no mueve', () => {
         const resultado = engine.ejecutar('mover:arriba', state);
 

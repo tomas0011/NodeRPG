@@ -188,6 +188,22 @@ describe('En run: comprar equipo con oro', () => {
         expect(inventario).toContain('espada');
     });
 
+    it('comprar un artículo sin tilde y con mayúsculas mixtas lo guarda con su id canónico', async () => {
+        const { engine, sm } = entorno();
+        const sesion = await sm.resolver('run-pocion-mixta');
+        engine.ejecutarSesion('CrEaR', sesion.contexto);
+        const state = sesion.contexto.state!;
+        state.jugador.ganarOro(100);
+
+        const r = engine.ejecutarSesion('CoMpRaR:PoCiOn De CuRaCiOn', sesion.contexto);
+        const data = r.data as { comprado: string; inventario: string[] };
+
+        expect(r.ok).toBe(true);
+        expect(data.comprado).toBe('poción de curación');
+        expect(data.inventario).toContain('poción de curación');
+        expect(r.message).toContain('Poción de curación');
+    });
+
     it('comprar en-run sin oro suficiente → ok:false, sin cambios', async () => {
         const { engine, sm } = entorno();
         const sesion = await sm.resolver('run-pobre');

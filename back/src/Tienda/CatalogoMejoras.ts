@@ -1,5 +1,6 @@
 import { Articulo } from './Articulo';
 import { ConfigInicial } from './ConfigInicial';
+import { resolverClaveCanonica } from '../Input/normalizarEntrada';
 
 /**
  * Una **mejora** del hub: un `Articulo` (siempre en **plata**) más un
@@ -95,7 +96,8 @@ export default class CatalogoMejoras {
 
     /** Devuelve la mejora por su id, o `undefined` si no existe en el catálogo. */
     public static obtener(id: string): Mejora | undefined {
-        return CatalogoMejoras.registro[id];
+        const idCanonico = resolverClaveCanonica(id, CatalogoMejoras.registro);
+        return idCanonico ? CatalogoMejoras.registro[idCanonico] : undefined;
     }
 
     /** Todas las mejoras del catálogo, en orden de declaración. */
