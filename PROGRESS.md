@@ -230,3 +230,6 @@ Testeadores su veredicto.
   empíricamente por el Orquestador (build/test/lint/servidor verdes). 486 paquetes instalados en `back/`.
 - **2026-06-20** — Acordado `PLAN.md` (cambios grandes) y descompuesto en F0–F4 en este archivo.
 - **2026-06-20** — Creado el harness: `WORKFLOW.md`, `PROGRESS.md` y 6 skills.
+
+
+- **2026-07-01** - **Docker dev con recarga automatica OK**: se agrego `docker-compose.yml` en la raiz para levantar `app` + `back` en desarrollo con volumenes bind y recarga automatica al editar archivos. Nuevos archivos: `back/Dockerfile.dev`, `app/Dockerfile.dev`, `app/.dockerignore`. `readme.md` ahora documenta `docker compose up --build` y aclara que `back/Dockerfile` sigue reservado para produccion/Render. Validacion pendiente en esta sesion: build real de las imagenes y smoke de recarga, porque todavia no ejecute `docker compose`.
