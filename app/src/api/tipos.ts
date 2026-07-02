@@ -13,7 +13,7 @@ export interface CommandResponse {
   sessionId: string;
   content: string;
   ok: boolean;
-  enHub: boolean;
+  enHub?: boolean;
   data?: unknown;
   completions?: Record<string, string[]>;
 }

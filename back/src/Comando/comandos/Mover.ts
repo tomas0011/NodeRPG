@@ -1,6 +1,6 @@
 import CommandResult from '../../Game/CommandResult';
 import GameState from '../../Game/GameState';
-import LugarFactory from '../../Escenario/LugarFactory';
+import { resolverClaveCanonica } from '../../Input/normalizarEntrada';
 import IComando from '../IComando';
 
 /**
@@ -34,7 +34,8 @@ export default class Mover implements IComando {
         const salidas = lugarActual.getSalidas();
         const direcciones = Object.keys(salidas);
 
-        const destinoId = salida ? salidas[salida] : undefined;
+        const salidaCanonica = salida ? resolverClaveCanonica(salida, salidas) : undefined;
+        const destinoId = salidaCanonica ? salidas[salidaCanonica] : undefined;
         if (!destinoId) {
             return {
                 ok: false,
@@ -51,7 +52,7 @@ export default class Mover implements IComando {
         // Reconstruye la sala destino desde su id y la semilla de la run (el
         // mapa generado por esa semilla es la fuente; cacheado por semilla) y
         // actualiza posición (lugar + lugarId) en paralelo.
-        const lugarDestino = LugarFactory.crear(destinoId, state.semilla);
+        const lugarDestino = state.reconstruirLugar(destinoId);
         state.escenario.setLugar(lugarDestino);
         state.lugarId = destinoId;
         if (!state.salasVisitadas.includes(destinoId)) {

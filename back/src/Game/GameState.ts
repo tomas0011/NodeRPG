@@ -1,8 +1,17 @@
 import { Escenario } from "../Escenario/Escenario";
+import ILugar from "../Escenario/Lugar/ILugar";
+import LugarFactory from "../Escenario/LugarFactory";
+import { resolverValorCanonico } from "../Input/normalizarEntrada";
 import { Objeto } from "../Objeto/Objeto";
 import IPersonaje from "../Personaje/IPersonaje";
 import { Personaje } from "../Personaje/Personaje";
 import { PersonajeJugable } from "../Personaje/personajes/Jugador";
+import {
+    EstadoMutableDeSala,
+    EstadoMutablePorSala,
+    crearEstadoMutableDeSala,
+    normalizarEstadoMutablePorSala
+} from "./EstadoMutableDeSala";
 
 /**
  * Constructor de un decorador de personaje: recibe el portador envuelto y
@@ -35,6 +44,12 @@ export default class GameState {
 
     /** Salas ya visitadas en esta run. Se persiste; su lógica es Fase 3. */
     public salasVisitadas: string[];
+
+    /**
+     * Delta mutable del mapa base, indexado por `lugarId`.
+     * Persiste los cambios de cada sala sin serializar instancias vivas.
+     */
+    public estadoMutablePorSala: EstadoMutablePorSala;
 
     /** Jugador base sin decorar. Su inventario es la fuente de los objetos. */
     public readonly jugadorBase: PersonajeJugable;
@@ -71,7 +86,8 @@ export default class GameState {
         runId: string = 'local',
         semilla: number = 0,
         lugarId: string = 'bar',
-        salasVisitadas: string[] = []
+        salasVisitadas: string[] = [],
+        estadoMutablePorSala: EstadoMutablePorSala = {}
     ) {
         this.jugadorBase = jugadorBase;
         this.escenario = escenario;
@@ -80,9 +96,45 @@ export default class GameState {
         this.semilla = semilla;
         this.lugarId = lugarId;
         this.salasVisitadas = salasVisitadas;
+        this.estadoMutablePorSala = normalizarEstadoMutablePorSala(estadoMutablePorSala);
         this.creadoEn = new Date();
         this.jugador = jugadorBase;
         this.rebuildDecoratedPlayer();
+    }
+
+    /**
+     * Devuelve el delta mutable de una sala, creándolo vacío si aún no existe.
+     * Es el punto compartido para futuras mutaciones por `lugarId`.
+     */
+    public obtenerEstadoMutableDeSala(lugarId: string): EstadoMutableDeSala {
+        if (!this.estadoMutablePorSala[lugarId]) {
+            this.estadoMutablePorSala[lugarId] = crearEstadoMutableDeSala();
+        }
+        return this.estadoMutablePorSala[lugarId];
+    }
+
+    /**
+     * Reconstruye una sala viva desde el mapa base de la run y el delta mutable
+     * persistido para ese `lugarId`.
+     */
+    public reconstruirLugar(lugarId: string): ILugar {
+        return LugarFactory.crear(lugarId, this.semilla, this.estadoMutablePorSala);
+    }
+
+    /**
+     * Persiste la toma de un objeto de la sala actual en su delta mutable.
+     * Si la ocurrencia visible proviene del contenido base, se registra en
+     * `objetosTomados`; si proviene de `objetosAgregadosAlSuelo`, se remueve de
+     * esa lista para que no reaparezca al reconstruir la sala.
+     */
+    public registrarObjetoTomadoDelLugarActual(nombreObjeto: string): void {
+        const estadoMutable = this.obtenerEstadoMutableDeSala(this.lugarId);
+        if (this.tieneObjetoBaseDisponibleEnSalaActual(nombreObjeto, estadoMutable)) {
+            estadoMutable.objetosTomados.push(nombreObjeto);
+            return;
+        }
+
+        this.removerPrimeraCoincidencia(estadoMutable.objetosAgregadosAlSuelo, nombreObjeto);
     }
 
     /**
@@ -118,8 +170,9 @@ export default class GameState {
         if (!objeto.getModificacion()) {
             return false;
         }
-        if (!this.equipados.includes(id)) {
-            this.equipados.push(id);
+        const idCanonico = objeto.getNombre();
+        if (!this.equipados.includes(idCanonico)) {
+            this.equipados.push(idCanonico);
         }
         this.rebuildDecoratedPlayer();
         return true;
@@ -129,7 +182,12 @@ export default class GameState {
      * Desequipa el ítem `id`. Devuelve `true` si estaba equipado y se quitó.
      */
     public desequipar(id: string): boolean {
-        const posicion = this.equipados.indexOf(id);
+        const idCanonico = resolverValorCanonico(id, this.equipados, (equipado: string) => equipado);
+        if (!idCanonico) {
+            return false;
+        }
+
+        const posicion = this.equipados.indexOf(idCanonico);
         if (posicion === -1) {
             return false;
         }
@@ -153,9 +211,49 @@ export default class GameState {
 
     /** Busca un objeto del inventario del jugador por su nombre. */
     private buscarObjetoEquipado(id: string): Objeto | undefined {
-        return this.jugadorBase
-            .getInventario()
-            .getObjetos()
-            .find((objeto: Objeto) => objeto.getNombre() === id);
+        return resolverValorCanonico(
+            id,
+            this.jugadorBase.getInventario().getObjetos(),
+            (objeto: Objeto) => objeto.getNombre()
+        );
+    }
+
+    /**
+     * La sala reconstruida siempre ordena primero los objetos base y luego los
+     * agregados por delta. Como `tomar` elige la primera coincidencia por nombre,
+     * alcanza con saber si aún queda alguna ocurrencia base visible de ese id.
+     */
+    private tieneObjetoBaseDisponibleEnSalaActual(
+        nombreObjeto: string,
+        estadoMutable: EstadoMutableDeSala
+    ): boolean {
+        const cantidadBase = this.contarCoincidencias(
+            LugarFactory.crear(this.lugarId, this.semilla)
+                .getObjetos()
+                .map((objeto) => objeto.getNombre()),
+            nombreObjeto
+        );
+        const cantidadTomados = this.contarCoincidencias(
+            estadoMutable.objetosTomados,
+            nombreObjeto
+        );
+        return cantidadBase > cantidadTomados;
+    }
+
+    private contarCoincidencias(ids: string[], idBuscado: string): number {
+        let coincidencias = 0;
+        for (const id of ids) {
+            if (id === idBuscado) {
+                coincidencias += 1;
+            }
+        }
+        return coincidencias;
+    }
+
+    private removerPrimeraCoincidencia(ids: string[], idBuscado: string): void {
+        const posicion = ids.indexOf(idBuscado);
+        if (posicion !== -1) {
+            ids.splice(posicion, 1);
+        }
     }
 }

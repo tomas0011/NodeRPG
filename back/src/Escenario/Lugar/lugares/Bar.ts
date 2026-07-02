@@ -1,3 +1,4 @@
+import { EstadoMutableDeSala } from "../../../Game/EstadoMutableDeSala";
 import MapaDeRun from "../../MapaDeRun";
 import Sala from "./Sala";
 
@@ -10,7 +11,7 @@ import Sala from "./Sala";
  * `'bar'`; la base `Sala` resuelve el contenido por ese id en el mapa dado.
  */
 export default class Bar extends Sala {
-    constructor(mapa?: MapaDeRun) {
-        super('bar', mapa);
+    constructor(mapa?: MapaDeRun, estadoMutable?: EstadoMutableDeSala) {
+        super('bar', mapa, estadoMutable);
     }
 }

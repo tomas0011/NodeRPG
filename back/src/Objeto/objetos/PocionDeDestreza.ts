@@ -16,4 +16,8 @@ export class PocionDeDestreza extends Objeto {
     getEfecto(): IEfecto {
         return new EfectoBuffDestreza(1);
     }
+
+    getDescripcion(): string {
+        return 'Un consumible que aumenta tu destreza en 1 durante la run actual.';
+    }
 }

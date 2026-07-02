@@ -1,3 +1,5 @@
+import { normalizarEntrada } from '../utils/normalizarEntrada';
+
 /**
  * Catálogo estático de comandos del front. Sirve para:
  *  - el autocompletado de nombres de comando (filtrado por contexto hub/run),
@@ -92,5 +94,6 @@ export function comandosDeContexto(enHub: boolean): DefinicionComando[] {
 
 /** Busca la definición de un comando por su nombre base. */
 export function definicionDe(nombre: string): DefinicionComando | undefined {
-  return COMANDOS.find((c) => c.nombre === nombre);
+  const nombreNormalizado = normalizarEntrada(nombre);
+  return COMANDOS.find((c) => normalizarEntrada(c.nombre) === nombreNormalizado);
 }

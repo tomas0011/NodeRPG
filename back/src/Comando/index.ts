@@ -8,6 +8,7 @@ import Historial from "./comandos/Historial";
 import GetEscenario from "./comandos/GetEscenario";
 import GetHelp from "./comandos/GetHelp";
 import GetStatus from "./comandos/GetStatus";
+import InspeccionarObjeto from "./comandos/InspeccionarObjeto";
 import Mover from "./comandos/Mover";
 import Perfil from "./comandos/Perfil";
 import Tienda from "./comandos/Tienda";
@@ -25,6 +26,7 @@ export {
     GetHelp,
     GetStatus,
     Historial,
+    InspeccionarObjeto,
     Mover,
     Perfil,
     Tienda,

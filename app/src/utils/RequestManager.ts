@@ -64,7 +64,6 @@ export class RequestManager {
                 sessionId,
                 content: mensaje,
                 ok: false,
-                enHub: true,
                 data: undefined,
                 completions: {}
             };

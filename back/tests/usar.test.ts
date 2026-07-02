@@ -88,6 +88,19 @@ describe('Comando usar (vía GameEngine)', () => {
         expect(tieneObjeto('poción de curación')).toBe(false);
     });
 
+    it('usar una poción sin tilde y con mayúsculas mixtas resuelve el nombre canónico', () => {
+        state.jugadorBase.getInventario().agregarObjeto(new PocionDeCuracion());
+        state.jugador.recibirDaño(5);
+
+        const r = engine.ejecutar('UsAr:PoCiOn De CuRaCiOn', state);
+        const data = r.data as { objeto: string };
+
+        expect(r.ok).toBe(true);
+        expect(data.objeto).toBe('poción de curación');
+        expect(r.message).toContain('"poción de curación"');
+        expect(tieneObjeto('poción de curación')).toBe(false);
+    });
+
     it('curar nunca excede la vida máxima', () => {
         state.jugadorBase.getInventario().agregarObjeto(new PocionDeCuracion());
         state.jugador.recibirDaño(2); // poca vida perdida

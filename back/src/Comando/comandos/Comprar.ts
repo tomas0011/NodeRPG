@@ -1,5 +1,6 @@
 import CommandResult from '../../Game/CommandResult';
 import SesionContexto from '../../Game/SesionContexto';
+import { sonEntradasEquivalentes } from '../../Input/normalizarEntrada';
 import ObjetoFactory from '../../Objeto/ObjetoFactory';
 import CatalogoArticulos from '../../Tienda/CatalogoArticulos';
 import CatalogoMejoras from '../../Tienda/CatalogoMejoras';
@@ -45,7 +46,8 @@ export default class Comprar implements IComandoSesion {
         }
 
         const profile = contexto.profile;
-        const yaComprada = profile.mejoras.includes(id);
+        const idCanonico = mejora.articulo.id;
+        const yaComprada = profile.mejoras.some((mejoraComprada) => sonEntradasEquivalentes(mejoraComprada, idCanonico));
         if (!mejora.acumulable && yaComprada) {
             return { ok: false, message: `Ya tienes la mejora "${mejora.articulo.nombre}" (no es recomprable).` };
         }
@@ -59,14 +61,14 @@ export default class Comprar implements IComandoSesion {
         }
 
         profile.plata -= costo;
-        profile.mejoras.push(id);
+        profile.mejoras.push(idCanonico);
 
         return {
             ok: true,
             message: `Compraste "${mejora.articulo.nombre}" por ${costo} plata. Te quedan ${profile.plata}. Aplica a la próxima run.`,
             data: {
                 enHub: true,
-                comprado: id,
+                comprado: idCanonico,
                 moneda: 'plata',
                 costo,
                 plata: profile.plata,
@@ -83,7 +85,8 @@ export default class Comprar implements IComandoSesion {
         }
 
         const state = contexto.state!;
-        const objeto = ObjetoFactory.crear(id);
+        const idCanonico = articulo.id;
+        const objeto = ObjetoFactory.crear(idCanonico);
         if (!objeto) {
             // No debería pasar (el catálogo usa ids de la fábrica), pero se valida.
             return { ok: false, message: `No se puede instanciar el artículo "${id}".` };
@@ -106,7 +109,7 @@ export default class Comprar implements IComandoSesion {
             message: `Compraste "${articulo.nombre}" por ${costo} oro. Te quedan ${state.jugador.getOro()}.`,
             data: {
                 enHub: false,
-                comprado: id,
+                comprado: idCanonico,
                 moneda: 'oro',
                 costo,
                 oro: state.jugador.getOro(),

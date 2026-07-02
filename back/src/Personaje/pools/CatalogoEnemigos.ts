@@ -28,6 +28,20 @@ export default class CatalogoEnemigos {
         return constructor ? new constructor() : undefined;
     }
 
+    /**
+     * Resuelve el id lógico de un enemigo ya instanciado para persistir su
+     * eliminación por `lugarId`.
+     */
+    public static resolverId(enemigo: Personaje): string | undefined {
+        for (const id of Object.keys(CatalogoEnemigos.registro)) {
+            const constructor = CatalogoEnemigos.registro[id];
+            if (enemigo instanceof constructor) {
+                return id;
+            }
+        }
+        return undefined;
+    }
+
     /** Ids de todos los enemigos registrados (para 3h y diagnósticos). */
     public static ids(): string[] {
         return Object.keys(CatalogoEnemigos.registro);

@@ -1,3 +1,4 @@
+import AyudaDeComando from "../Comando/AyudaDeComando";
 import IComando from "../Comando/IComando";
 import IComandoSesion from "../Comando/IComandoSesion";
 import {
@@ -11,12 +12,14 @@ import {
     GetHelp,
     GetStatus,
     Historial,
+    InspeccionarObjeto,
     Mover,
     Perfil,
     Tienda,
     TomarObjeto,
     UsarObjeto
 } from "../Comando";
+import { resolverValorCanonico } from "../Input/normalizarEntrada";
 import CommandResult from "./CommandResult";
 import GameState from "./GameState";
 import SesionContexto from "./SesionContexto";
@@ -40,22 +43,106 @@ import SesionContexto from "./SesionContexto";
 export default class GameEngine {
     public readonly comandos: IComando[];
     public readonly comandosSesion: IComandoSesion[];
+    private readonly catalogoDeAyudas: { [clave: string]: AyudaDeComando } = {
+        escenario: {
+            clave: 'escenario',
+            uso: 'escenario',
+            descripcion: 'Muestra el lugar actual, sus personajes, objetos y salidas.'
+        },
+        help: {
+            clave: 'help',
+            uso: 'help',
+            descripcion: 'Lista todos los comandos disponibles con una breve explicación.'
+        },
+        status: {
+            clave: 'status',
+            uso: 'status',
+            descripcion: 'Muestra tu estado actual: vida, nivel, oro, equipo y estadísticas.'
+        },
+        tomar: {
+            clave: 'tomar',
+            uso: 'tomar:<objeto>',
+            descripcion: 'Recoge un objeto del lugar actual y lo guarda en tu inventario.'
+        },
+        inspeccionar: {
+            clave: 'inspeccionar',
+            uso: 'inspeccionar:<objeto>',
+            descripcion: 'Muestra la descripción y las propiedades de un objeto que lleves en el inventario.'
+        },
+        equipar: {
+            clave: 'equipar',
+            uso: 'equipar:<objeto>',
+            descripcion: 'Equipa un objeto de tu inventario si se puede usar como equipo.'
+        },
+        atacar: {
+            clave: 'atacar',
+            uso: 'atacar:<objetivo>',
+            descripcion: 'Ataca a un objetivo presente en la sala actual con tu arma actual.'
+        },
+        usar: {
+            clave: 'usar',
+            uso: 'usar:<objeto>',
+            descripcion: 'Usa un objeto consumible que tengas en tu inventario.'
+        },
+        mover: {
+            clave: 'mover',
+            uso: 'mover:<dirección>',
+            descripcion: 'Te desplaza por una salida válida de la sala actual.'
+        },
+        crear: {
+            clave: 'crear',
+            uso: 'crear',
+            descripcion: 'Inicia una nueva run desde el hub.'
+        },
+        abandonar: {
+            clave: 'abandonar',
+            uso: 'abandonar',
+            descripcion: 'Termina la run actual, banca la plata y te devuelve al hub.'
+        },
+        perfil: {
+            clave: 'perfil',
+            uso: 'perfil',
+            descripcion: 'Muestra la plata persistente, tus mejoras y el estado de la sesión.'
+        },
+        tienda: {
+            clave: 'tienda',
+            uso: 'tienda',
+            descripcion: 'Lista la tienda disponible en el contexto actual, sea hub o run.'
+        },
+        comprar: {
+            clave: 'comprar',
+            uso: 'comprar:<id>',
+            descripcion: 'Compra una mejora o un artículo según la tienda disponible.'
+        },
+        historial: {
+            clave: 'historial',
+            uso: 'historial',
+            descripcion: 'Lista las runs archivadas de tu sesión actual.'
+        },
+        detalle: {
+            clave: 'detalle',
+            uso: 'detalle:<runId>',
+            descripcion: 'Muestra el detalle completo de una run guardada en tu historial.'
+        }
+    };
 
     constructor() {
-        // GetHelp necesita conocer las claves disponibles; se las inyectamos
+        // GetHelp necesita conocer el catálogo disponible; se lo inyectamos
         // para no reintroducir un acceso global al manager.
-        const getHelp = new GetHelp(() => this.todasLasClaves());
+        const getHelp = new GetHelp(() => this.todasLasAyudas());
         this.comandos = [
             new GetEscenario(),
             getHelp,
             new GetStatus(),
             new TomarObjeto(),
+            new InspeccionarObjeto(),
             new EquiparObjeto(),
             new Atacar(),
             new UsarObjeto(),
             new Mover()
         ];
         this.comandosSesion = [
+            getHelp,
             new CrearPersonaje(),
             new Abandonar(),
             new Perfil(),
@@ -67,19 +154,29 @@ export default class GameEngine {
     }
 
     private getComando(comando: string): IComando | undefined {
-        return this.comandos.find((c: IComando) => c.esComando(comando));
+        return resolverValorCanonico(comando, this.comandos, (c: IComando) => c.getKey());
     }
 
     private getComandoSesion(comando: string): IComandoSesion | undefined {
-        return this.comandosSesion.find((c: IComandoSesion) => c.esComando(comando));
+        return resolverValorCanonico(comando, this.comandosSesion, (c: IComandoSesion) => c.getKey());
     }
 
-    /** Claves de todos los comandos (juego + sesión), para el `GetHelp`. */
-    private todasLasClaves(): string[] {
-        return [
+    /** Ayudas de todos los comandos (juego + sesión), para el `GetHelp`. */
+    private todasLasAyudas(): AyudaDeComando[] {
+        const claves = [
             ...this.comandos.map((c) => c.getKey()),
             ...this.comandosSesion.map((c) => c.getKey())
-        ];
+        ].filter((clave, indice, todas) => todas.indexOf(clave) === indice);
+
+        return claves.map((clave) => this.obtenerAyuda(clave));
+    }
+
+    private obtenerAyuda(clave: string): AyudaDeComando {
+        return this.catalogoDeAyudas[clave] || {
+            clave,
+            uso: clave,
+            descripcion: 'Sin descripción disponible.'
+        };
     }
 
     /**
@@ -132,7 +229,9 @@ export default class GameEngine {
     }
 
     private parsear(input: string): [string, string] {
-        const [comando, agente] = input.split(':').map((fragmento: string) => fragmento.trim());
+        const fragmentos = input.split(':');
+        const comando = (fragmentos[0] || '').trim();
+        const agente = fragmentos.slice(1).join(':').trim();
         return [comando, agente];
     }
 }

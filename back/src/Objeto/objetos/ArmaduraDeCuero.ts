@@ -9,4 +9,8 @@ export class ArmaduraDeCuero extends Objeto {
     getModificacion() {
         return ConArmaduraDeCuero;
     }
+
+    getDescripcion(): string {
+        return 'Una protección ligera de cuero. Al equiparla mejora tu clase de armadura sin dejar de ser un equipo flexible.';
+    }
 }

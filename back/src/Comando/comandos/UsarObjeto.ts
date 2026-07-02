@@ -1,5 +1,6 @@
 import CommandResult from '../../Game/CommandResult';
 import GameState from '../../Game/GameState';
+import { resolverValorCanonico } from '../../Input/normalizarEntrada';
 import { Objeto } from '../../Objeto/Objeto';
 import IComando from '../IComando';
 
@@ -27,9 +28,11 @@ export default class UsarObjeto implements IComando {
 
     ejecutar(nombreDeObjeto: string, state: GameState): CommandResult {
         const inventario = state.jugadorBase.getInventario();
-        const objeto = inventario
-            .getObjetos()
-            .find((o: Objeto) => o.getNombre() === nombreDeObjeto);
+        const objeto = resolverValorCanonico(
+            nombreDeObjeto,
+            inventario.getObjetos(),
+            (o: Objeto) => o.getNombre()
+        );
 
         if (!objeto) {
             return {

@@ -1,18 +1,21 @@
+import AyudaDeComando from '../AyudaDeComando';
 import CommandResult from '../../Game/CommandResult';
 import GameState from '../../Game/GameState';
+import SesionContexto from '../../Game/SesionContexto';
 import IComando from '../IComando';
+import IComandoSesion from '../IComandoSesion';
 
 /**
- * Proveedor de las claves de comandos disponibles. Se inyecta desde el motor
+ * Proveedor del catálogo de comandos disponibles. Se inyecta desde el motor
  * para evitar reintroducir un acceso global al manager de comandos.
  */
-type ProveedorDeClaves = () => string[];
+type ProveedorDeAyudas = () => AyudaDeComando[];
 
-class GetHelp implements IComando {
-    private readonly obtenerClaves: ProveedorDeClaves;
+class GetHelp implements IComando, IComandoSesion {
+    private readonly obtenerAyudas: ProveedorDeAyudas;
 
-    constructor(obtenerClaves: ProveedorDeClaves) {
-        this.obtenerClaves = obtenerClaves;
+    constructor(obtenerAyudas: ProveedorDeAyudas) {
+        this.obtenerAyudas = obtenerAyudas;
     }
 
     getKey() {
@@ -23,13 +26,23 @@ class GetHelp implements IComando {
         return comando === this.getKey()
     }
 
-    ejecutar(_agente: string, _state: GameState): CommandResult {
-        const claves = this.obtenerClaves();
+    ejecutar(_agente: string, _state: GameState): CommandResult;
+    ejecutar(_agente: string, _contexto: SesionContexto): CommandResult;
+    ejecutar(_agente: string, _stateOContexto: GameState | SesionContexto): CommandResult {
+        const ayudas = this.obtenerAyudas();
         return {
             ok: true,
-            message: claves.join('\n'),
-            data: { comandos: claves }
+            message: this.formatearAyudas(ayudas),
+            data: {
+                comandos: ayudas.map((ayuda) => ayuda.uso),
+                ayudas
+            }
         };
+    }
+
+    private formatearAyudas(ayudas: AyudaDeComando[]): string {
+        const lineas = ayudas.map((ayuda) => `- ${ayuda.uso}: ${ayuda.descripcion}`);
+        return `Comandos disponibles:\n${lineas.join('\n')}`;
     }
 }
 
