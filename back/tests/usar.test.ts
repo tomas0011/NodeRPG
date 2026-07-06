@@ -82,8 +82,8 @@ describe('Comando usar (vía GameEngine)', () => {
         const vidaDespues = state.jugador.getVidaActual();
         expect(vidaDespues).toBeGreaterThan(vidaAntes);
         expect(vidaDespues).toBeLessThanOrEqual(vidaMaxima);
-        // Curación de 5 sobre la vida dañada.
-        expect(vidaDespues).toBe(vidaAntes + 5);
+        // Curación de 8 sobre la vida dañada.
+        expect(vidaDespues).toBe(vidaAntes + 8);
         // Se consumió la poción.
         expect(tieneObjeto('poción de curación')).toBe(false);
     });

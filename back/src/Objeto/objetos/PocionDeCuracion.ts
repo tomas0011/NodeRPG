@@ -15,10 +15,10 @@ export class PocionDeCuracion extends Objeto {
     getModificacion() {}
 
     getEfecto(): IEfecto {
-        return new EfectoCurar(5);
+        return new EfectoCurar(8);
     }
 
     getDescripcion(): string {
-        return 'Un consumible que restaura 5 puntos de vida sin superar tu vida máxima.';
+        return 'Un consumible que restaura 8 puntos de vida sin superar tu vida máxima.';
     }
 }

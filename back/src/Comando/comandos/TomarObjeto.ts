@@ -13,6 +13,14 @@ class TomarObjeto implements IComando {
         return comando === this.getKey()
     }
 
+    getUso(): string {
+        return 'tomar:<objeto>';
+    }
+
+    getDescripcion(): string {
+        return 'Recoge un objeto del lugar actual y lo guarda en tu inventario.';
+    }
+
     ejecutar(nombreDeObjeto: string, state: GameState): CommandResult {
         const objetosDelLugar = state.escenario.getLugar().getObjetos()
         const objetoEncontrado = resolverValorCanonico(
@@ -29,7 +37,8 @@ class TomarObjeto implements IComando {
             objetosDelLugar.splice(posicion, 1)
         }
         state.registrarObjetoTomadoDelLugarActual(objetoEncontrado.getNombre())
-        const inventario = state.jugadorBase.getInventario().getObjetos().map((objeto) => objeto.getNombre());
+        // Sugerencias desde el inventario visible (lo equipado no se re-equipa).
+        const inventario = state.objetosDisponibles().map((objeto) => objeto.getNombre());
         return {
             ok: true,
             message: `Tomaste un/a "${objetoEncontrado.getNombre()}"`,

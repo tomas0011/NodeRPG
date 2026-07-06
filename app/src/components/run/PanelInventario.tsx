@@ -25,15 +25,19 @@ function PanelInventario() {
             <li key={`${obj}-${i}`}>
               <span>{obj}</span>
               <span className="fila-acciones">
-                <Boton
-                  variante="chip"
-                  disabled={ocupado}
-                  onClick={() => {
-                    void ejecutar(`equipar:${obj}`);
-                  }}
-                >
-                  Equipar
-                </Boton>
+                {/* Con equipo por nombre, un duplicado de algo ya equipado no
+                    puede re-equiparse: no se ofrece el botón. */}
+                {!status.equipados.includes(obj) ? (
+                  <Boton
+                    variante="chip"
+                    disabled={ocupado}
+                    onClick={() => {
+                      void ejecutar(`equipar:${obj}`);
+                    }}
+                  >
+                    Equipar
+                  </Boton>
+                ) : null}
                 <Boton
                   variante="chip"
                   disabled={ocupado}
@@ -55,9 +59,22 @@ function PanelInventario() {
         Equipados
       </h3>
       {status.equipados.length > 0 ? (
-        <ul className="lista-mejoras">
+        <ul className="lista-entidades">
           {status.equipados.map((obj, i) => (
-            <li key={`${obj}-${i}`}>{obj}</li>
+            <li key={`${obj}-${i}`}>
+              <span>{obj}</span>
+              <span className="fila-acciones">
+                <Boton
+                  variante="chip"
+                  disabled={ocupado}
+                  onClick={() => {
+                    void ejecutar(`desequipar:${obj}`);
+                  }}
+                >
+                  Desequipar
+                </Boton>
+              </span>
+            </li>
           ))}
         </ul>
       ) : (

@@ -12,6 +12,7 @@ import {
   CommandResponse,
   EscenarioData,
   HistorialData,
+  MapaData,
   PerfilData,
   StatusData,
   runTerminada
@@ -35,6 +36,7 @@ interface GameContextValue {
   historial: HistorialData | null;
   status: StatusData | null;
   escenario: EscenarioData | null;
+  mapa: MapaData | null;
   mensajes: MensajeConsola[];
   /** Últimas completions recibidas, acumuladas por clave. */
   completions: Record<string, string[]>;
@@ -62,6 +64,10 @@ function esHistorialData(data: unknown): data is HistorialData {
   return !!data && typeof data === 'object' && 'runs' in data;
 }
 
+function esMapaData(data: unknown): data is MapaData {
+  return !!data && typeof data === 'object' && 'lugarActual' in data && 'salas' in data;
+}
+
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [enHub, setEnHub] = useState<boolean>(true);
   const [cargando, setCargando] = useState<boolean>(true);
@@ -70,6 +76,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [historial, setHistorial] = useState<HistorialData | null>(null);
   const [status, setStatus] = useState<StatusData | null>(null);
   const [escenario, setEscenario] = useState<EscenarioData | null>(null);
+  const [mapa, setMapa] = useState<MapaData | null>(null);
   const [mensajes, setMensajes] = useState<MensajeConsola[]>([]);
   const [completions, setCompletions] = useState<Record<string, string[]>>({});
 
@@ -108,6 +115,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (esHistorialData(data)) {
       setHistorial(data);
     }
+    if (esMapaData(data)) {
+      setMapa(data);
+    }
   }, []);
 
   // Petición silenciosa (sin loguear en consola) para refrescar paneles.
@@ -125,17 +135,20 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   /** Refresca el contexto del hub (perfil + historial) sin loguear. */
   const refrescarHub = useCallback(async () => {
+    // El minimapa es de la run: al volver al hub se descarta.
+    setMapa(null);
     await Promise.all([
       refrescarSilencioso('perfil'),
       refrescarSilencioso('historial')
     ]);
   }, [refrescarSilencioso]);
 
-  /** Refresca los paneles de la partida (status + escenario) sin loguear. */
+  /** Refresca los paneles de la partida (status + escenario + mapa) sin loguear. */
   const refrescarRun = useCallback(async () => {
     await Promise.all([
       refrescarSilencioso('status'),
-      refrescarSilencioso('escenario')
+      refrescarSilencioso('escenario'),
+      refrescarSilencioso('mapa')
     ]);
   }, [refrescarSilencioso]);
 
@@ -164,9 +177,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Refresco automático de paneles tras cada comando:
-        //  - si la run terminó o caímos al hub, refrescamos el hub;
-        //  - si seguimos en partida, re-pedimos status + escenario.
-        if (resp.ok && (resp.enHub || runTerminada(resp.data))) {
+        //  - si el comando fue ok y estamos/caímos en el hub o terminó la run,
+        //    refrescamos el hub;
+        //  - si un comando FALLÓ pero nos hizo caer al hub (la run se cerró
+        //    desde otra pestaña o murió en el server), también: los paneles del
+        //    hub quedarían viejos. Un fallo estando ya en el hub no refresca.
+        //  - si seguimos en partida, re-pedimos status + escenario + mapa.
+        const cayoAlHub = resp.enHub === true && !enHub;
+        if ((resp.ok && (resp.enHub || runTerminada(resp.data))) || cayoAlHub) {
           await refrescarHub();
         } else if (resp.ok && !proximoEnHub) {
           await refrescarRun();
@@ -224,6 +242,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       historial,
       status,
       escenario,
+      mapa,
       mensajes,
       completions,
       ejecutar
@@ -236,6 +255,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       historial,
       status,
       escenario,
+      mapa,
       mensajes,
       completions,
       ejecutar

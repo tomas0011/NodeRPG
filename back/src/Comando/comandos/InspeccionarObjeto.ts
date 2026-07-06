@@ -13,19 +13,48 @@ class InspeccionarObjeto implements IComando {
         return comando === this.getKey();
     }
 
+    getUso(): string {
+        return 'inspeccionar:<objeto>';
+    }
+
+    getDescripcion(): string {
+        return 'Muestra la descripción y las propiedades de un objeto de tu inventario o del suelo.';
+    }
+
     ejecutar(nombreDeObjeto: string, state: GameState): CommandResult {
         const inventario = state.jugadorBase.getInventario().getObjetos();
-        const objetoEncontrado = resolverValorCanonico(
+        const suelo = state.escenario.getLugar().getObjetos();
+
+        // Primero el inventario; si no está, el suelo de la sala actual (se
+        // puede mirar el loot sin tomarlo).
+        let ubicacion = 'en tu inventario';
+        let objetoEncontrado = resolverValorCanonico(
             nombreDeObjeto,
             inventario,
             (objeto: Objeto) => objeto.getNombre()
         );
-        const completions = { inspeccionar: inventario.map((objeto: Objeto) => objeto.getNombre()) };
+        if (objetoEncontrado && state.equipados.includes(objetoEncontrado.getNombre())) {
+            ubicacion = 'equipado';
+        }
+        if (!objetoEncontrado) {
+            objetoEncontrado = resolverValorCanonico(
+                nombreDeObjeto,
+                suelo,
+                (objeto: Objeto) => objeto.getNombre()
+            );
+            ubicacion = 'en el suelo';
+        }
+
+        const nombres = inventario
+            .concat(suelo)
+            .map((objeto: Objeto) => objeto.getNombre())
+            .filter((nombre, indice, todos) => todos.indexOf(nombre) === indice);
+        const completions = { inspeccionar: nombres };
 
         if (!objetoEncontrado) {
             return {
                 ok: false,
-                message: `No tienes ningún "${nombreDeObjeto}" en tu inventario.`,
+                message: `No hay ningún "${nombreDeObjeto}" en tu inventario ni en la sala.`,
                 completions
             };
         }
@@ -35,7 +64,8 @@ class InspeccionarObjeto implements IComando {
             `Objeto: ${objetoEncontrado.getNombre()}`,
             `Clase: ${objetoEncontrado.getClase()}`,
             `Descripción: ${objetoEncontrado.getDescripcion()}`,
-            `Propiedades: ${capacidades.join(', ')}`
+            `Propiedades: ${capacidades.join(', ')}`,
+            `Ubicación: ${ubicacion}`
         ].join('\n');
 
         return {
@@ -45,7 +75,8 @@ class InspeccionarObjeto implements IComando {
                 nombre: objetoEncontrado.getNombre(),
                 clase: objetoEncontrado.getClase(),
                 descripcion: objetoEncontrado.getDescripcion(),
-                propiedades: capacidades
+                propiedades: capacidades,
+                ubicacion
             },
             completions
         };

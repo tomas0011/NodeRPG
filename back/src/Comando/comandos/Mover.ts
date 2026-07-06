@@ -1,6 +1,7 @@
 import CommandResult from '../../Game/CommandResult';
 import GameState from '../../Game/GameState';
 import { resolverClaveCanonica } from '../../Input/normalizarEntrada';
+import { seccion } from '../formato';
 import IComando from '../IComando';
 
 /**
@@ -27,6 +28,14 @@ export default class Mover implements IComando {
 
     esComando(comando: string): boolean {
         return comando === this.getKey();
+    }
+
+    getUso(): string {
+        return 'mover:<dirección>';
+    }
+
+    getDescripcion(): string {
+        return 'Te desplaza por una salida válida de la sala actual.';
     }
 
     ejecutar(salida: string, state: GameState): CommandResult {
@@ -64,12 +73,12 @@ export default class Mover implements IComando {
         const salidasDestino = lugarDestino.getSalidas();
         const direccionesDestino = Object.keys(salidasDestino);
 
-        const message = `
-            Te mueves a: ${lugarDestino.getNombre()}
-            Personas: ${personajes}
-            Objetos: ${objetos}
-            Salidas: ${direccionesDestino}
-        `;
+        const message = [
+            `Te mueves a: ${lugarDestino.getNombre()}`,
+            ...seccion('Personas', personajes, 'nadie'),
+            ...seccion('Objetos', objetos, 'ninguno'),
+            ...seccion('Salidas', direccionesDestino, 'ninguna')
+        ].join('\n');
 
         return {
             ok: true,

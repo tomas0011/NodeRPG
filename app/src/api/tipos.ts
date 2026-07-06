@@ -141,6 +141,23 @@ export interface EscenarioData {
   salasVisitadas?: string[];
 }
 
+/** Sala del minimapa (`mapa`). Sin `nombre`/`tipo` si no fue visitada. */
+export interface SalaDeMapa {
+  id: string;
+  x: number;
+  y: number;
+  visitada: boolean;
+  salidas: string[];
+  nombre?: string;
+  tipo?: string;
+}
+
+/** `mapa` */
+export interface MapaData {
+  lugarActual: string;
+  salas: SalaDeMapa[];
+}
+
 /** `atacar` */
 export interface AtacarData {
   objetivo: string;

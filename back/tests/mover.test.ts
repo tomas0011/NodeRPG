@@ -26,7 +26,8 @@ describe('mover (3f) - salidas y desplazamiento', () => {
 
     it('mover por una salida válida cambia la sala actual y la añade a salasVisitadas', () => {
         expect(state.lugarId).toBe('bar');
-        expect(state.salasVisitadas).toEqual([]);
+        // La sala inicial viene sembrada (el jugador ya la conoce).
+        expect(state.salasVisitadas).toEqual(['bar']);
 
         const resultado = engine.ejecutar('mover:este', state);
 
@@ -54,7 +55,7 @@ describe('mover (3f) - salidas y desplazamiento', () => {
         expect(resultado.completions?.mover).toEqual(['este']);
         // No se movió.
         expect(state.lugarId).toBe('bar');
-        expect(state.salasVisitadas).toEqual([]);
+        expect(state.salasVisitadas).toEqual(['bar']);
     });
 
     it('mover sin argumento devuelve ok:false sin mover', () => {
@@ -184,11 +185,11 @@ describe('Round-trip con el jugador en una sala distinta del bar', () => {
 
         const dto = GameStateMapper.toDTO(state);
         expect(dto.escenario.lugarId).toBe('sala-combate');
-        expect(dto.escenario.salasVisitadas).toEqual(['pasillo', 'sala-combate']);
+        expect(dto.escenario.salasVisitadas).toEqual(['bar', 'pasillo', 'sala-combate']);
 
         const reconstruido = GameStateMapper.fromDTO(dto);
         expect(reconstruido.lugarId).toBe('sala-combate');
-        expect(reconstruido.salasVisitadas).toEqual(['pasillo', 'sala-combate']);
+        expect(reconstruido.salasVisitadas).toEqual(['bar', 'pasillo', 'sala-combate']);
         // La sala reconstruida es la correcta, con sus ocupantes/salidas del layout.
         expect(reconstruido.escenario.getLugar().getNombre()).toBe('Sala de combate');
         const ocupantes = reconstruido.escenario.getLugar().getPersonajes().map((p) => p.getNombre());

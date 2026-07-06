@@ -37,6 +37,7 @@ export const COMANDOS: DefinicionComando[] = [
   },
   // --- Run ---
   { nombre: 'escenario', descripcion: 'Describe el lugar actual.', contexto: 'run' },
+  { nombre: 'mapa', descripcion: 'Muestra el minimapa de salas descubiertas.', contexto: 'run' },
   { nombre: 'status', descripcion: 'Muestra tu estado: vida, nivel, oro, equipo.', contexto: 'run' },
   {
     nombre: 'mover',
@@ -57,10 +58,22 @@ export const COMANDOS: DefinicionComando[] = [
     claveCompletions: 'atacar'
   },
   {
+    nombre: 'inspeccionar',
+    descripcion: 'Miras un objeto de cerca: inspeccionar:<objeto>.',
+    contexto: 'run',
+    claveCompletions: 'inspeccionar'
+  },
+  {
     nombre: 'equipar',
     descripcion: 'Equipas un objeto del inventario: equipar:<objeto>.',
     contexto: 'run',
     claveCompletions: 'equipar'
+  },
+  {
+    nombre: 'desequipar',
+    descripcion: 'Desequipas un objeto y vuelve al inventario: desequipar:<objeto>.',
+    contexto: 'run',
+    claveCompletions: 'desequipar'
   },
   {
     nombre: 'usar',
@@ -81,7 +94,13 @@ export const COMANDOS: DefinicionComando[] = [
     contexto: 'ambos',
     claveCompletions: 'comprar'
   },
-  { nombre: 'perfil', descripcion: 'Muestra tu perfil: plata y mejoras.', contexto: 'ambos' }
+  { nombre: 'perfil', descripcion: 'Muestra tu perfil: plata y mejoras.', contexto: 'ambos' },
+  {
+    nombre: 'help',
+    descripcion: 'Lista los comandos; help:<comando> muestra el detalle de uno.',
+    contexto: 'ambos',
+    claveCompletions: 'help'
+  }
 ];
 
 /** Comandos válidos en el contexto actual (hub o run). */

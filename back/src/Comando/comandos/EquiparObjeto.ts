@@ -13,6 +13,14 @@ class EquiparObjeto implements IComando {
         return comando === this.getKey()
     }
 
+    getUso(): string {
+        return 'equipar:<objeto>';
+    }
+
+    getDescripcion(): string {
+        return 'Equipa un objeto de tu inventario si se puede usar como equipo.';
+    }
+
     ejecutar(nombreDeObjeto: string, state: GameState): CommandResult {
         const objetoEncontrado = resolverValorCanonico(
             nombreDeObjeto,
@@ -25,6 +33,13 @@ class EquiparObjeto implements IComando {
         if (!objetoEncontrado.getModificacion()) {
             return { ok: false, message: 'El objeto no se puede equipar' };
         }
+        if (state.equipados.includes(objetoEncontrado.getNombre())) {
+            return {
+                ok: false,
+                message: `"${objetoEncontrado.getNombre()}" ya está equipado.`,
+                data: { equipados: state.equipados }
+            };
+        }
         const equipado = state.equipar(objetoEncontrado.getNombre());
         if (!equipado) {
             return { ok: false, message: 'No se pudo equipar el objeto' };
@@ -32,7 +47,12 @@ class EquiparObjeto implements IComando {
         return {
             ok: true,
             message: `Te Equipaste un/a "${objetoEncontrado.getNombre()}"`,
-            data: { equipados: state.equipados }
+            data: { equipados: state.equipados },
+            // Alimenta el autocompletado de `desequipar` desde el primer equipar.
+            completions: {
+                desequipar: state.equipados.slice(),
+                equipar: state.objetosDisponibles().map((objeto: Objeto) => objeto.getNombre())
+            }
         };
     }
 }

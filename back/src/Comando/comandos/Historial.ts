@@ -27,6 +27,14 @@ export default class Historial implements IComandoSesion {
         return comando === this.getKey();
     }
 
+    getUso(): string {
+        return 'historial';
+    }
+
+    getDescripcion(): string {
+        return 'Lista las runs archivadas de tu sesión actual.';
+    }
+
     ejecutar(_agente: string, contexto: SesionContexto): CommandResult {
         const runs = contexto.historial;
 

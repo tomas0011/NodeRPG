@@ -29,7 +29,7 @@ const MARTILLO: Articulo = {
     id: 'martillo',
     nombre: 'Martillo',
     descripcion: 'Arma pesada de daño alto.',
-    costo: 25,
+    costo: 35,
     moneda: 'oro'
 };
 

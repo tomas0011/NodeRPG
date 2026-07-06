@@ -2,6 +2,7 @@ import Abandonar from "./comandos/Abandonar";
 import Atacar from "./comandos/Atacar";
 import Comprar from "./comandos/Comprar";
 import CrearPersonaje from "./comandos/CrearPersonaje";
+import DesequiparObjeto from "./comandos/DesequiparObjeto";
 import Detalle from "./comandos/Detalle";
 import EquiparObjeto from "./comandos/EquiparObjeto";
 import Historial from "./comandos/Historial";
@@ -9,6 +10,7 @@ import GetEscenario from "./comandos/GetEscenario";
 import GetHelp from "./comandos/GetHelp";
 import GetStatus from "./comandos/GetStatus";
 import InspeccionarObjeto from "./comandos/InspeccionarObjeto";
+import Mapa from "./comandos/Mapa";
 import Mover from "./comandos/Mover";
 import Perfil from "./comandos/Perfil";
 import Tienda from "./comandos/Tienda";
@@ -20,6 +22,7 @@ export {
     Atacar,
     Comprar,
     CrearPersonaje,
+    DesequiparObjeto,
     Detalle,
     EquiparObjeto,
     GetEscenario,
@@ -27,6 +30,7 @@ export {
     GetStatus,
     Historial,
     InspeccionarObjeto,
+    Mapa,
     Mover,
     Perfil,
     Tienda,

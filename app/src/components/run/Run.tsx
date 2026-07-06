@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Boton from '../common/Boton';
 import ToggleTema from '../common/ToggleTema';
 import PanelUbicacion from './PanelUbicacion';
+import PanelMapa from './PanelMapa';
 import PanelInventario from './PanelInventario';
 import BarraEstado from './BarraEstado';
 import Consola from './Consola';
@@ -37,6 +38,7 @@ function Run() {
           <div className="run__paneles" id="run-tui">
             <BarraEstado />
             <PanelUbicacion />
+            <PanelMapa />
             <PanelInventario />
           </div>
         ) : null}

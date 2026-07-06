@@ -26,6 +26,7 @@ function crearContextoParcial() {
     historial: null,
     status: null,
     escenario: null,
+    mapa: null,
     mensajes: [],
     completions: {
       mover: ['norte', 'sur'],

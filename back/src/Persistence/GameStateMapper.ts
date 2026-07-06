@@ -92,7 +92,13 @@ export default class GameStateMapper {
         const semilla = typeof dto.semilla === 'number' ? dto.semilla : 0;
         // Sala inicial del mapa de esa semilla, por si el DTO no trae lugarId.
         const lugarId = (dto.escenario && dto.escenario.lugarId) || LugarFactory.lugarInicial(semilla);
-        const salasVisitadas = (dto.escenario && dto.escenario.salasVisitadas) || [];
+        const salasVisitadas = ((dto.escenario && dto.escenario.salasVisitadas) || []).slice();
+        // Backfill para runs persistidas antes de sembrar la sala inicial: el
+        // jugador siempre arranca ahí, así que el minimapa debe conocerla.
+        const salaInicial = LugarFactory.lugarInicial(semilla);
+        if (!salasVisitadas.includes(salaInicial)) {
+            salasVisitadas.unshift(salaInicial);
+        }
         const estadoMutablePorSala = normalizarEstadoMutablePorSala(
             dto.escenario && dto.escenario.estadoMutablePorSala
         );

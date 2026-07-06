@@ -31,6 +31,14 @@ export default class Comprar implements IComandoSesion {
         return comando === this.getKey();
     }
 
+    getUso(): string {
+        return 'comprar:<id>';
+    }
+
+    getDescripcion(): string {
+        return 'Compra una mejora o un artículo según la tienda disponible.';
+    }
+
     ejecutar(id: string, contexto: SesionContexto): CommandResult {
         if (!id) {
             return { ok: false, message: 'Indica qué comprar: "comprar:<id>". Mira la "tienda".' };
@@ -115,7 +123,7 @@ export default class Comprar implements IComandoSesion {
                 oro: state.jugador.getOro(),
                 inventario
             },
-            completions: { equipar: inventario }
+            completions: { equipar: state.objetosDisponibles().map((o) => o.getNombre()) }
         };
     }
 }

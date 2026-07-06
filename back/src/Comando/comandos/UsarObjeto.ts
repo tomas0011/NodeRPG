@@ -26,6 +26,14 @@ export default class UsarObjeto implements IComando {
         return comando === this.getKey();
     }
 
+    getUso(): string {
+        return 'usar:<objeto>';
+    }
+
+    getDescripcion(): string {
+        return 'Usa un objeto consumible que tengas en tu inventario.';
+    }
+
     ejecutar(nombreDeObjeto: string, state: GameState): CommandResult {
         const inventario = state.jugadorBase.getInventario();
         const objeto = resolverValorCanonico(

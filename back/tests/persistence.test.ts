@@ -87,7 +87,8 @@ describe('Round-trip toDTO → fromDTO (serialización sin pérdida)', () => {
         const state = GameStateMapper.fromDTO(dtoParcial);
         expect(state.jugadorBase.getOro()).toBe(0);
         expect(state.jugadorBase.getVidaActual()).toBe(8);
-        expect(state.salasVisitadas).toEqual([]);
+        // Backfill: la sala inicial siempre se conoce (minimapa), aun en docs viejos.
+        expect(state.salasVisitadas).toEqual(['bar']);
         expect(state.jugador.dadoDeGolpe()).toBe(6); // espada reconstruida y equipada
     });
 

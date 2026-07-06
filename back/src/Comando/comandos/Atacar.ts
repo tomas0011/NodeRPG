@@ -54,6 +54,14 @@ export default class Atacar implements IComando {
         return comando === this.getKey();
     }
 
+    getUso(): string {
+        return 'atacar:<objetivo>';
+    }
+
+    getDescripcion(): string {
+        return 'Ataca a un objetivo presente en la sala actual con tu arma actual.';
+    }
+
     ejecutar(nombreNpc: string, state: GameState): CommandResult {
         const lugar = state.escenario.getLugar();
         const objetivo = this.buscarNpc(lugar.getPersonajes(), nombreNpc);
@@ -173,7 +181,11 @@ export default class Atacar implements IComando {
      * daño), con mínimo 1. Aplica el daño al jugador decorado y lo devuelve.
      */
     private contraatacar(npc: Personaje, state: GameState): number {
-        const mitigacion = Math.floor(state.jugador.claseDeArmadura() / 10);
+        // Mitigación por encima de la CA base (10): cada 2 puntos de armadura
+        // real restan 1 de daño (CA 11 → 0, cuero 14 → 2, placas 19 → 4). El
+        // viejo `floor(CA/10)` era 1 plano en todo el rango 10-19, así que
+        // comprar armadura no cambiaba nada.
+        const mitigacion = Math.floor(Math.max(0, state.jugador.claseDeArmadura() - 10) / 2);
         const daño = Math.max(1, npc.dadoDeGolpe() - mitigacion);
         state.jugador.recibirDaño(daño);
         return daño;

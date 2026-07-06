@@ -63,6 +63,15 @@ function escenarioRun() {
   };
 }
 
+function mapaRun() {
+  return {
+    lugarActual: 'taberna',
+    salas: [
+      { id: 'taberna', x: 0, y: 0, visitada: true, salidas: ['este'], nombre: 'Taberna', tipo: 'bar' }
+    ]
+  };
+}
+
 function historialVacio() {
   return { runs: [] };
 }
@@ -94,6 +103,14 @@ function Sonda() {
       >
         Abandonar
       </button>
+      <button
+        type="button"
+        onClick={() => {
+          void ejecutar('atacar:rata');
+        }}
+      >
+        Atacar
+      </button>
     </div>
   );
 }
@@ -112,6 +129,8 @@ describe('GameProvider', () => {
           return respuestaBase(command, { enHub: false, data: statusRun() });
         case 'escenario':
           return respuestaBase(command, { enHub: false, data: escenarioRun() });
+        case 'mapa':
+          return respuestaBase(command, { enHub: false, data: mapaRun() });
         case 'foo':
           return respuestaBase(command, {
             ok: false,
@@ -138,13 +157,14 @@ describe('GameProvider', () => {
     await waitFor(() => {
       expect(screen.getByTestId('estado')).toHaveTextContent('run');
       expect(screen.getByTestId('mensajes')).toHaveTextContent('Comando inválido.');
-      expect(mockEnviar).toHaveBeenCalledTimes(4);
+      expect(mockEnviar).toHaveBeenCalledTimes(5);
     });
 
     expect(mockEnviar.mock.calls.map(([command]) => command)).toEqual([
       'perfil',
       'status',
       'escenario',
+      'mapa',
       'foo'
     ]);
   });
@@ -192,6 +212,59 @@ describe('GameProvider', () => {
     ]);
   });
 
+  it('refresca el hub cuando un comando falla porque la run ya no existe (ok:false + enHub:true)', async () => {
+    mockEnviar.mockImplementation(async (command: string) => {
+      switch (command) {
+        case 'perfil':
+          return respuestaBase(command, { enHub: false, data: perfilRun() });
+        case 'status':
+          return respuestaBase(command, { enHub: false, data: statusRun() });
+        case 'escenario':
+          return respuestaBase(command, { enHub: false, data: escenarioRun() });
+        case 'mapa':
+          return respuestaBase(command, { enHub: false, data: mapaRun() });
+        case 'atacar:rata':
+          return respuestaBase(command, {
+            ok: false,
+            enHub: true,
+            content: 'Estás en el hub: no hay run activa.'
+          });
+        case 'historial':
+          return respuestaBase(command, { enHub: true, data: historialVacio() });
+        default:
+          throw new Error(`Comando inesperado en test: ${command}`);
+      }
+    });
+
+    render(
+      <GameProvider>
+        <Sonda />
+      </GameProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('estado')).toHaveTextContent('run');
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Atacar' }));
+
+    // Cambia al hub Y re-pide perfil + historial (aunque el comando falló).
+    await waitFor(() => {
+      expect(screen.getByTestId('estado')).toHaveTextContent('hub');
+      expect(mockEnviar).toHaveBeenCalledTimes(7);
+    });
+
+    expect(mockEnviar.mock.calls.map(([command]) => command)).toEqual([
+      'perfil',
+      'status',
+      'escenario',
+      'mapa',
+      'atacar:rata',
+      'perfil',
+      'historial'
+    ]);
+  });
+
   it('sigue refrescando el hub cuando la respuesta valida termina la run', async () => {
     mockEnviar.mockImplementation(async (command: string) => {
       switch (command) {
@@ -201,6 +274,8 @@ describe('GameProvider', () => {
           return respuestaBase(command, { enHub: false, data: statusRun() });
         case 'escenario':
           return respuestaBase(command, { enHub: false, data: escenarioRun() });
+        case 'mapa':
+          return respuestaBase(command, { enHub: false, data: mapaRun() });
         case 'abandonar':
           return respuestaBase(command, {
             enHub: true,
@@ -228,13 +303,14 @@ describe('GameProvider', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('estado')).toHaveTextContent('hub');
-      expect(mockEnviar).toHaveBeenCalledTimes(6);
+      expect(mockEnviar).toHaveBeenCalledTimes(7);
     });
 
     expect(mockEnviar.mock.calls.map(([command]) => command)).toEqual([
       'perfil',
       'status',
       'escenario',
+      'mapa',
       'abandonar',
       'perfil',
       'historial'

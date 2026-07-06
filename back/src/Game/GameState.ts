@@ -197,6 +197,38 @@ export default class GameState {
     }
 
     /**
+     * Objetos actualmente equipados, en el orden de `equipados`. El objeto vive
+     * en el inventario base (fuente de verdad de la persistencia); esta vista lo
+     * resuelve por id para mostrarlo como sección aparte.
+     */
+    public objetosEquipados(): Objeto[] {
+        const objetos: Objeto[] = [];
+        for (const id of this.equipados) {
+            const objeto = this.buscarObjetoEquipado(id);
+            if (objeto) {
+                objetos.push(objeto);
+            }
+        }
+        return objetos;
+    }
+
+    /**
+     * Inventario "visible": los objetos del inventario base menos UNA ocurrencia
+     * por cada id equipado (dos espadas con una equipada ⇒ una disponible).
+     * El objeto equipado no se muestra en el inventario; vuelve al desequipar.
+     */
+    public objetosDisponibles(): Objeto[] {
+        const disponibles = this.jugadorBase.getInventario().getObjetos().slice();
+        for (const id of this.equipados) {
+            const posicion = disponibles.findIndex((objeto) => objeto.getNombre() === id);
+            if (posicion !== -1) {
+                disponibles.splice(posicion, 1);
+            }
+        }
+        return disponibles;
+    }
+
+    /**
      * Marca la run como terminada por la `causa` dada. Idempotente: si ya estaba
      * terminada, conserva la primera causa registrada. Sólo cambia el flag; el
      * cierre (bankear/archivar/borrar) lo hace el ciclo de sesión.
