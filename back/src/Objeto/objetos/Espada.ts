@@ -15,4 +15,8 @@ export class Espada extends Objeto {
     getEstrategiaDeAtaque(): IEstrategiaDeAtaque {
         return new EspadaStrategy();
     }
+
+    getDescripcion(): string {
+        return 'Una espada confiable para combate cercano. Al equiparla mejora tu dado de golpe y te permite atacar cuerpo a cuerpo.';
+    }
 }

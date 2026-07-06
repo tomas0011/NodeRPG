@@ -9,4 +9,8 @@ export class ArmaduraDePlacas extends Objeto {
     getModificacion() {
         return ConArmaduraDePlacas;
     }
+
+    getDescripcion(): string {
+        return 'Una armadura pesada de placas pensada para absorber golpes. Ofrece una defensa mayor al equiparla.';
+    }
 }

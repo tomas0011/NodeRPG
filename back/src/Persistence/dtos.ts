@@ -16,8 +16,10 @@
  * Versión de esquema vigente de cada agregado. Bump al cambiar la forma.
  * v2 (3i): el `JugadorDTO` añade `xp`/`nivel`. Deserialización tolerante: docs
  * v1 sin esos campos caen a `xp:0`/`nivel:1` sin romper.
+ * v3: `EscenarioDTO` añade `estadoMutablePorSala` para persistir mutaciones de
+ * sala por `lugarId`. Deserialización tolerante: docs viejos caen a `{}`.
  */
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 /** Jugador de una run, en forma plana y serializable. */
 export interface JugadorDTO {
@@ -42,10 +44,23 @@ export interface JugadorDTO {
     equipados: string[];
 }
 
+/** Delta mutable persistible de una sala. */
+export interface EstadoMutableDeSalaDTO {
+    objetosTomados: string[];
+    objetosAgregadosAlSuelo: string[];
+    ocupantesEliminados: string[];
+}
+
+/** Estado mutable de salas indexado por `lugarId`. */
+export interface EstadoMutablePorSalaDTO {
+    [lugarId: string]: EstadoMutableDeSalaDTO;
+}
+
 /** Escenario de una run, en forma plana y serializable. */
 export interface EscenarioDTO {
     lugarId: string;
     salasVisitadas: string[];
+    estadoMutablePorSala?: EstadoMutablePorSalaDTO;
 }
 
 /** DTO completo de una run activa (colección `runs`). */

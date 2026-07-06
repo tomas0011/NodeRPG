@@ -24,6 +24,14 @@ export default class CrearPersonaje implements IComandoSesion {
         return comando === this.getKey();
     }
 
+    getUso(): string {
+        return 'crear';
+    }
+
+    getDescripcion(): string {
+        return 'Inicia una nueva run desde el hub.';
+    }
+
     ejecutar(_agente: string, contexto: SesionContexto): CommandResult {
         if (!contexto.enHub()) {
             return {

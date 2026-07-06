@@ -7,6 +7,7 @@ import { ArmaduraDeCuero } from "./objetos/ArmaduraDeCuero";
 import { ArmaduraDePlacas } from "./objetos/ArmaduraDePlacas";
 import { PocionDeCuracion } from "./objetos/PocionDeCuracion";
 import { PocionDeDestreza } from "./objetos/PocionDeDestreza";
+import { resolverClaveCanonica } from "../Input/normalizarEntrada";
 
 /**
  * Constructor sin argumentos de un `Objeto` concreto.
@@ -42,7 +43,12 @@ export default class ObjetoFactory {
      * o de otra versión no debe tumbar la carga).
      */
     public static crear(id: string): Objeto | undefined {
-        const constructor = ObjetoFactory.registro[id];
+        const idCanonico = resolverClaveCanonica(id, ObjetoFactory.registro);
+        if (!idCanonico) {
+            return undefined;
+        }
+
+        const constructor = ObjetoFactory.registro[idCanonico];
         if (!constructor) {
             return undefined;
         }

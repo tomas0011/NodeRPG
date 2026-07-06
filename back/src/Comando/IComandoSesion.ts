@@ -15,5 +15,9 @@ import SesionContexto from '../Game/SesionContexto';
 export default interface IComandoSesion {
     getKey(): string;
     esComando(comando: string): boolean;
+    /** Forma de invocación mostrada en la ayuda, p. ej. `detalle:<runId>`. */
+    getUso(): string;
+    /** Descripción breve del comando para el catálogo de `help`. */
+    getDescripcion(): string;
     ejecutar(agente: string, contexto: SesionContexto): CommandResult;
 }

@@ -105,8 +105,8 @@ describe('Cierre por muerte (contraataque determinista)', () => {
         engine.ejecutarSesion('crear', sesion.contexto);
         const state = sesion.contexto.state!;
 
-        // El jugador base tiene 10 de vida; CA 11 → mitigación floor(11/10)=1;
-        // Cantinero dado 4 → contraataque 3/exchange. Sin arma, el jugador no
+        // El jugador base tiene 10 de vida; CA 11 → mitigación floor((11-10)/2)=0;
+        // Cantinero dado 4 → contraataque 4/exchange. Sin arma, el jugador no
         // mata al Cantinero (10 de vida) antes de morir. Secuencia fija:
         let ultima = engine.ejecutarSesion('atacar:Cantinero Pepe', sesion.contexto);
         let golpes = 1;
@@ -119,8 +119,8 @@ describe('Cierre por muerte (contraataque determinista)', () => {
         expect(state.causaFin).toBe('muerte');
         expect(state.jugador.getVidaActual()).toBeLessThanOrEqual(0);
         expect((ultima.data as { murioJugador: boolean }).murioJugador).toBe(true);
-        // Muerte reproducible: con 10 de vida y 3 de daño por exchange, muere al 4º.
-        expect(golpes).toBe(4);
+        // Muerte reproducible: con 10 de vida y 4 de daño por exchange, muere al 3º.
+        expect(golpes).toBe(3);
     });
 
     it('la muerte cierra la run: archiva, borra y vuelve al hub con la plata bankeada', async () => {

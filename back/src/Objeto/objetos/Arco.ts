@@ -15,4 +15,8 @@ export class Arco extends Objeto {
     getEstrategiaDeAtaque(): IEstrategiaDeAtaque {
         return new ArcoStrategy();
     }
+
+    getDescripcion(): string {
+        return 'Un arco ligero pensado para ataques a distancia. Al equiparlo cambia tu forma de atacar por disparos precisos.';
+    }
 }

@@ -1,6 +1,7 @@
 import CommandResult from '../../Game/CommandResult';
 import GameState from '../../Game/GameState';
-import LugarFactory from '../../Escenario/LugarFactory';
+import { resolverClaveCanonica } from '../../Input/normalizarEntrada';
+import { seccion } from '../formato';
 import IComando from '../IComando';
 
 /**
@@ -29,12 +30,21 @@ export default class Mover implements IComando {
         return comando === this.getKey();
     }
 
+    getUso(): string {
+        return 'mover:<dirección>';
+    }
+
+    getDescripcion(): string {
+        return 'Te desplaza por una salida válida de la sala actual.';
+    }
+
     ejecutar(salida: string, state: GameState): CommandResult {
         const lugarActual = state.escenario.getLugar();
         const salidas = lugarActual.getSalidas();
         const direcciones = Object.keys(salidas);
 
-        const destinoId = salida ? salidas[salida] : undefined;
+        const salidaCanonica = salida ? resolverClaveCanonica(salida, salidas) : undefined;
+        const destinoId = salidaCanonica ? salidas[salidaCanonica] : undefined;
         if (!destinoId) {
             return {
                 ok: false,
@@ -51,7 +61,7 @@ export default class Mover implements IComando {
         // Reconstruye la sala destino desde su id y la semilla de la run (el
         // mapa generado por esa semilla es la fuente; cacheado por semilla) y
         // actualiza posición (lugar + lugarId) en paralelo.
-        const lugarDestino = LugarFactory.crear(destinoId, state.semilla);
+        const lugarDestino = state.reconstruirLugar(destinoId);
         state.escenario.setLugar(lugarDestino);
         state.lugarId = destinoId;
         if (!state.salasVisitadas.includes(destinoId)) {
@@ -63,12 +73,12 @@ export default class Mover implements IComando {
         const salidasDestino = lugarDestino.getSalidas();
         const direccionesDestino = Object.keys(salidasDestino);
 
-        const message = `
-            Te mueves a: ${lugarDestino.getNombre()}
-            Personas: ${personajes}
-            Objetos: ${objetos}
-            Salidas: ${direccionesDestino}
-        `;
+        const message = [
+            `Te mueves a: ${lugarDestino.getNombre()}`,
+            ...seccion('Personas', personajes, 'nadie'),
+            ...seccion('Objetos', objetos, 'ninguno'),
+            ...seccion('Salidas', direccionesDestino, 'ninguna')
+        ].join('\n');
 
         return {
             ok: true,

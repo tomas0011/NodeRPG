@@ -1,0 +1,36 @@
+services:
+  back:
+    build:
+      context: ./back
+      dockerfile: Dockerfile.dev
+    working_dir: /app
+    command: npm start
+    environment:
+      PORT: 3001
+      CHOKIDAR_USEPOLLING: "true"
+      TSC_WATCHFILE: UsePolling
+      TSC_WATCHDIRECTORY: UsePolling
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./back:/app
+      - /app/node_modules
+
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.dev
+    working_dir: /app
+    command: npm start
+    environment:
+      PORT: 3000
+      REACT_APP_API_URL: http://localhost:3001
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./app:/app
+      - /app/node_modules
+    depends_on:
+      - back

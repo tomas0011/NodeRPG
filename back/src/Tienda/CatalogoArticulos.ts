@@ -1,4 +1,5 @@
 import { Articulo } from './Articulo';
+import { resolverClaveCanonica } from '../Input/normalizarEntrada';
 
 /**
  * Catálogo de equipo comprable **dentro de la run** (moneda: **oro**). Vende
@@ -28,7 +29,7 @@ const MARTILLO: Articulo = {
     id: 'martillo',
     nombre: 'Martillo',
     descripcion: 'Arma pesada de daño alto.',
-    costo: 25,
+    costo: 35,
     moneda: 'oro'
 };
 
@@ -69,7 +70,8 @@ export default class CatalogoArticulos {
 
     /** Devuelve el artículo por su id, o `undefined` si no existe en el catálogo. */
     public static obtener(id: string): Articulo | undefined {
-        return CatalogoArticulos.registro[id];
+        const idCanonico = resolverClaveCanonica(id, CatalogoArticulos.registro);
+        return idCanonico ? CatalogoArticulos.registro[idCanonico] : undefined;
     }
 
     /** Todos los artículos comprables en-run, en orden de declaración. */

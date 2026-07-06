@@ -18,6 +18,8 @@ function Consola() {
   const indiceHistorial = useRef<number>(-1);
 
   const logRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const debeRecuperarFoco = useRef(false);
 
   const { sugerencias, aplicar } = useAutocomplete({ valor, enHub, completions });
 
@@ -36,11 +38,22 @@ function Consola() {
     );
   }, [sugerencias]);
 
+  useEffect(() => {
+    if (!ocupado && debeRecuperarFoco.current && inputRef.current) {
+      const input = inputRef.current;
+      input.focus();
+      const longitud = input.value.length;
+      input.setSelectionRange(longitud, longitud);
+      debeRecuperarFoco.current = false;
+    }
+  }, [ocupado]);
+
   const enviar = (texto: string) => {
     const limpio = texto.trim();
     if (!limpio || ocupado) {
       return;
     }
+    debeRecuperarFoco.current = true;
     historial.current = [...historial.current, limpio];
     indiceHistorial.current = -1;
     setValor('');
@@ -148,6 +161,7 @@ function Consola() {
         ) : null}
         <span className="consola__prompt">&gt;</span>
         <input
+          ref={inputRef}
           className="consola__input"
           value={valor}
           placeholder="Escribe un comando…"

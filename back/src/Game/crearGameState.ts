@@ -61,7 +61,8 @@ export default function crearGameState(
         }
     }
     // Sala inicial del mapa de esta semilla (layout fijo si es la centinela).
+    // Se siembra en `salasVisitadas`: el jugador ya la conoce (minimapa).
     const lugarId = LugarFactory.lugarInicial(semilla);
     const escenario = new Escenario(LugarFactory.crear(lugarId, semilla));
-    return new GameState(jugador, escenario, sessionId, runId, semilla, lugarId, []);
+    return new GameState(jugador, escenario, sessionId, runId, semilla, lugarId, [lugarId]);
 }

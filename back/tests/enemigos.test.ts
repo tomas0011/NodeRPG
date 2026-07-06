@@ -1,10 +1,10 @@
-import { Rata } from '../src/Personaje/personajes/Rata';
 import { Bandido } from '../src/Personaje/personajes/Bandido';
 import { Ogro } from '../src/Personaje/personajes/Ogro';
+import { Rata } from '../src/Personaje/personajes/Rata';
 import CatalogoEnemigos from '../src/Personaje/pools/CatalogoEnemigos';
 import CatalogoOcupantes from '../src/Personaje/pools/CatalogoOcupantes';
 
-describe('Enemigos nuevos (3f) — stats y recompensa', () => {
+describe('Enemigos nuevos (3f) - stats y recompensa', () => {
     it('Rata: stats débiles y botín pequeño', () => {
         const rata = new Rata();
         expect(rata.getNombre()).toBe('Rata');
@@ -26,8 +26,8 @@ describe('Enemigos nuevos (3f) — stats y recompensa', () => {
     it('Ogro (jefe): stats altos y botín grande', () => {
         const ogro = new Ogro();
         expect(ogro.getNombre()).toBe('Ogro');
-        expect(ogro.getVidaMaxima()).toBe(30);
-        expect(ogro.dadoDeGolpe()).toBe(9);
+        expect(ogro.getVidaMaxima()).toBe(26);
+        expect(ogro.dadoDeGolpe()).toBe(7);
         expect(ogro.claseDeArmadura()).toBe(15);
         expect(ogro.getRecompensa()).toEqual({ oro: 50, plata: 25 });
     });
@@ -35,15 +35,13 @@ describe('Enemigos nuevos (3f) — stats y recompensa', () => {
     it('recibirDaño reduce la vida (atacable como cualquier Personaje)', () => {
         const ogro = new Ogro();
         ogro.recibirDaño(10);
-        expect(ogro.getVidaActual()).toBe(20);
+        expect(ogro.getVidaActual()).toBe(16);
     });
 });
 
 describe('Pools de enemigos/ocupantes (para 3h)', () => {
     it('CatalogoEnemigos resuelve cada id a una instancia nueva', () => {
-        expect(CatalogoEnemigos.ids()).toEqual(
-            expect.arrayContaining(['rata', 'bandido', 'ogro'])
-        );
+        expect(CatalogoEnemigos.ids()).toEqual(expect.arrayContaining(['rata', 'bandido', 'ogro']));
         const a = CatalogoEnemigos.crear('ogro');
         const b = CatalogoEnemigos.crear('ogro');
         expect(a).toBeDefined();
@@ -59,5 +57,11 @@ describe('Pools de enemigos/ocupantes (para 3h)', () => {
         expect(CatalogoOcupantes.crear('rata')!.getNombre()).toBe('Rata');
         expect(CatalogoOcupantes.crear('cantinero')!.getNombre()).toBe('Cantinero Pepe');
         expect(CatalogoOcupantes.crear('nadie')).toBeUndefined();
+    });
+
+    it('CatalogoOcupantes resuelve el id lógico de instancias ya creadas', () => {
+        expect(CatalogoOcupantes.resolverId(new Rata())).toBe('rata');
+        expect(CatalogoOcupantes.resolverId(new Bandido())).toBe('bandido');
+        expect(CatalogoOcupantes.resolverId(new Ogro())).toBe('ogro');
     });
 });

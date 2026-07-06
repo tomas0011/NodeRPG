@@ -1,6 +1,8 @@
 import GameEngine from '../src/Game/GameEngine';
 import GameState from '../src/Game/GameState';
+import SesionContexto from '../src/Game/SesionContexto';
 import crearGameState from '../src/Game/crearGameState';
+import { ProfileDTO } from '../src/Persistence/dtos';
 
 describe('GameEngine (sin HTTP ni globales)', () => {
     let engine: GameEngine;
@@ -21,6 +23,15 @@ describe('GameEngine (sin HTTP ni globales)', () => {
         expect(state.jugador.dadoDeGolpe()).toBe(4);
     });
 
+    it('ejecutar acepta comandos y nombres de objeto sin distinguir mayúsculas', () => {
+        const resultado = engine.ejecutar('ToMaR:EsPaDa', state);
+        const inventario = state.jugadorBase.getInventario().getObjetos().map((o) => o.getNombre());
+
+        expect(resultado.ok).toBe(true);
+        expect(resultado.message).toContain('"espada"');
+        expect(inventario).toContain('espada');
+    });
+
     it('escenario devuelve ok y completions de tomar', () => {
         const resultado = engine.ejecutar('escenario', state);
         expect(resultado.ok).toBe(true);
@@ -29,8 +40,70 @@ describe('GameEngine (sin HTTP ni globales)', () => {
         );
     });
 
+    it('help devuelve un listado legible con todos los comandos y sus descripciones', () => {
+        const resultado = engine.ejecutar('help', state);
+        const data = resultado.data as { comandos: string[]; ayudas: Array<{ uso: string; descripcion: string }> };
+        const comandosEsperados = [
+            'escenario',
+            'help',
+            'status',
+            'tomar:<objeto>',
+            'inspeccionar:<objeto>',
+            'equipar:<objeto>',
+            'desequipar:<objeto>',
+            'atacar:<objetivo>',
+            'usar:<objeto>',
+            'mover:<dirección>',
+            'mapa',
+            'crear',
+            'abandonar',
+            'perfil',
+            'tienda',
+            'comprar:<id>',
+            'historial',
+            'detalle:<runId>'
+        ];
+
+        expect(resultado.ok).toBe(true);
+        expect(resultado.message).toContain('Comandos disponibles:');
+        expect(resultado.message).toContain('- help: Lista todos los comandos disponibles; con "help:<comando>" muestra el detalle de uno.');
+        expect(resultado.message).toContain('- inspeccionar:<objeto>: Muestra la descripción y las propiedades de un objeto de tu inventario o del suelo.');
+        expect(resultado.message).toContain('- mover:<dirección>: Te desplaza por una salida válida de la sala actual.');
+        expect(resultado.message).toContain('- detalle:<runId>: Muestra el detalle completo de una run guardada en tu historial.');
+        expect(data.comandos).toEqual(expect.arrayContaining(comandosEsperados));
+        expect(data.ayudas).toHaveLength(comandosEsperados.length);
+        data.ayudas.forEach((ayuda) => {
+            expect(ayuda.descripcion.length).toBeGreaterThan(0);
+        });
+    });
+
     it('comando inexistente lanza Error', () => {
         expect(() => engine.ejecutar('comandoInexistente', state)).toThrow('Comando no encontrado');
+    });
+
+    it('help:<comando> devuelve el detalle de un comando puntual', () => {
+        const resultado = engine.ejecutar('help:mover', state);
+        const data = resultado.data as { ayuda: { clave: string; uso: string; descripcion: string } };
+
+        expect(resultado.ok).toBe(true);
+        expect(resultado.message).toBe(
+            'Comando: mover\nUso: mover:<dirección>\nDescripción: Te desplaza por una salida válida de la sala actual.'
+        );
+        expect(data.ayuda.clave).toBe('mover');
+        expect(resultado.completions?.help).toEqual(expect.arrayContaining(['mover', 'help', 'crear']));
+    });
+
+    it('help:<comando> no distingue mayúsculas', () => {
+        const resultado = engine.ejecutar('help:MoVeR', state);
+        expect(resultado.ok).toBe(true);
+        expect(resultado.message).toContain('Comando: mover');
+    });
+
+    it('help de un comando inexistente falla con ok:false y sugiere la lista', () => {
+        const resultado = engine.ejecutar('help:inexistente', state);
+        expect(resultado.ok).toBe(false);
+        expect(resultado.message).toBe('No existe el comando "inexistente". Escribe "help" para ver la lista completa.');
+        expect(resultado.completions?.help).toEqual(expect.arrayContaining(['mover', 'help']));
     });
 
     it('tomar un objeto lo quita del lugar y lo agrega al inventario (no duplica)', () => {
@@ -41,6 +114,99 @@ describe('GameEngine (sin HTTP ni globales)', () => {
         const inventario = state.jugadorBase.getInventario().getObjetos().map((o) => o.getNombre());
         expect(inventario).toContain('espada');
         expect(inventario.filter((n) => n === 'espada').length).toBe(1);
+    });
+
+    it('tomar un objeto base lo persiste como tomado en el delta y no reaparece al volver a entrar', () => {
+        const tomar = engine.ejecutar('tomar:espada', state);
+
+        expect(tomar.ok).toBe(true);
+        expect(state.estadoMutablePorSala['bar']).toEqual({
+            objetosTomados: ['espada'],
+            objetosAgregadosAlSuelo: [],
+            ocupantesEliminados: []
+        });
+        expect(state.escenario.getLugar().getObjetos().map((objeto) => objeto.getNombre())).not.toContain('espada');
+
+        engine.ejecutar('mover:este', state);
+        engine.ejecutar('mover:oeste', state);
+
+        const objetosDelBar = state.escenario.getLugar().getObjetos().map((objeto) => objeto.getNombre());
+        const inventario = state.jugadorBase.getInventario().getObjetos().map((objeto) => objeto.getNombre());
+        expect(objetosDelBar).not.toContain('espada');
+        expect(inventario).toContain('espada');
+    });
+
+    it('tomar un objeto agregado al suelo lo remueve del delta correcto sin marcarlo como tomado base', () => {
+        state.estadoMutablePorSala['bar'] = {
+            objetosTomados: [],
+            objetosAgregadosAlSuelo: ['martillo'],
+            ocupantesEliminados: []
+        };
+        state.escenario.setLugar(state.reconstruirLugar('bar'));
+
+        const tomar = engine.ejecutar('tomar:martillo', state);
+
+        expect(tomar.ok).toBe(true);
+        expect(state.estadoMutablePorSala['bar']).toEqual({
+            objetosTomados: [],
+            objetosAgregadosAlSuelo: [],
+            ocupantesEliminados: []
+        });
+
+        engine.ejecutar('mover:este', state);
+        engine.ejecutar('mover:oeste', state);
+
+        const objetosDelBar = state.escenario.getLugar().getObjetos().map((objeto) => objeto.getNombre());
+        const inventario = state.jugadorBase.getInventario().getObjetos().map((objeto) => objeto.getNombre());
+        expect(objetosDelBar).not.toContain('martillo');
+        expect(inventario).toContain('martillo');
+    });
+
+    it('inspeccionar devuelve información legible del objeto en inventario', () => {
+        engine.ejecutar('tomar:espada', state);
+
+        const resultado = engine.ejecutar('inspeccionar:espada', state);
+        const data = resultado.data as { nombre: string; clase: string; descripcion: string; propiedades: string[] };
+
+        expect(resultado.ok).toBe(true);
+        expect(resultado.message).toContain('Objeto: espada');
+        expect(resultado.message).toContain('Clase: arma');
+        expect(resultado.message).toContain('Descripción:');
+        expect(resultado.message).toContain('Propiedades: equipable, arma');
+        expect(data.nombre).toBe('espada');
+        expect(data.clase).toBe('arma');
+        expect(data.descripcion).toContain('combate cercano');
+        expect(data.propiedades).toEqual(['equipable', 'arma']);
+    });
+
+    it('inspeccionar funciona sobre un objeto del suelo sin tomarlo', () => {
+        const resultado = engine.ejecutar('inspeccionar:espada', state);
+        const data = resultado.data as { nombre: string; ubicacion: string };
+
+        expect(resultado.ok).toBe(true);
+        expect(resultado.message).toContain('Objeto: espada');
+        expect(resultado.message).toContain('Ubicación: en el suelo');
+        expect(data.ubicacion).toBe('en el suelo');
+        // Y sigue en el suelo: inspeccionar no lo toma.
+        const objetosDelBar = state.escenario.getLugar().getObjetos().map((o) => o.getNombre());
+        expect(objetosDelBar).toContain('espada');
+    });
+
+    it('inspeccionar prioriza el inventario cuando el objeto está en ambos lados', () => {
+        engine.ejecutar('tomar:espada', state);
+        const resultado = engine.ejecutar('inspeccionar:espada', state);
+        expect(resultado.ok).toBe(true);
+        expect(resultado.message).toContain('Ubicación: en tu inventario');
+    });
+
+    it('inspeccionar falla con ok:false si el objeto no está ni en inventario ni en la sala', () => {
+        const resultado = engine.ejecutar('inspeccionar:martillo', state);
+
+        expect(resultado.ok).toBe(false);
+        expect(resultado.message).toBe('No hay ningún "martillo" en tu inventario ni en la sala.');
+        expect(resultado.completions?.inspeccionar).toEqual(
+            expect.arrayContaining(['espada', 'armadura de cuero', 'taza'])
+        );
     });
 
     it('secuencia tomar→equipar→status refleja el cambio en dadoDeGolpe (espada)', () => {
@@ -69,6 +235,76 @@ describe('GameEngine (sin HTTP ni globales)', () => {
         engine.ejecutar('equipar:espada', state);
         expect(state.equipados).toEqual(['espada']);
         expect(state.jugador.dadoDeGolpe()).toBe(6);
+    });
+
+    it('equipar un objeto ya equipado avisa con ok:false', () => {
+        engine.ejecutar('tomar:espada', state);
+        engine.ejecutar('equipar:espada', state);
+        const resultado = engine.ejecutar('equipar:espada', state);
+        expect(resultado.ok).toBe(false);
+        expect(resultado.message).toBe('"espada" ya está equipado.');
+    });
+
+    it('el objeto equipado sale del inventario visible de status y aparece en equipados', () => {
+        engine.ejecutar('tomar:espada', state);
+        engine.ejecutar('tomar:taza', state);
+        engine.ejecutar('equipar:espada', state);
+
+        const status = engine.ejecutar('status', state);
+        const data = status.data as { inventario: string[]; equipados: string[] };
+
+        expect(data.inventario).toEqual(['taza']);
+        expect(data.equipados).toEqual(['espada']);
+        expect(status.message).toContain('Equipado:\n- espada');
+        expect(status.message).toContain('Inventario:\n- taza');
+    });
+
+    it('desequipar devuelve el objeto al inventario visible y restaura los stats', () => {
+        engine.ejecutar('tomar:espada', state);
+        engine.ejecutar('equipar:espada', state);
+        expect(state.jugador.dadoDeGolpe()).toBe(6);
+
+        const resultado = engine.ejecutar('desequipar:espada', state);
+        const data = resultado.data as { inventario: string[]; equipados: string[] };
+
+        expect(resultado.ok).toBe(true);
+        expect(resultado.message).toBe('Te desequipaste "espada": vuelve a tu inventario.');
+        expect(data.equipados).toEqual([]);
+        expect(data.inventario).toContain('espada');
+        expect(state.jugador.dadoDeGolpe()).toBe(4);
+    });
+
+    it('desequipar no distingue mayúsculas', () => {
+        engine.ejecutar('tomar:espada', state);
+        engine.ejecutar('equipar:espada', state);
+        const resultado = engine.ejecutar('desequipar:EsPaDa', state);
+        expect(resultado.ok).toBe(true);
+        expect(state.equipados).toEqual([]);
+    });
+
+    it('desequipar un objeto no equipado falla con ok:false', () => {
+        engine.ejecutar('tomar:espada', state);
+        const resultado = engine.ejecutar('desequipar:espada', state);
+        expect(resultado.ok).toBe(false);
+        expect(resultado.message).toBe('"espada" no está equipado.');
+    });
+
+    it('con duplicados, equipar uno deja el otro visible en el inventario', () => {
+        // Segunda espada vía delta (mismo mecanismo que el loot dropeado).
+        state.estadoMutablePorSala['bar'] = {
+            objetosTomados: [],
+            objetosAgregadosAlSuelo: ['espada'],
+            ocupantesEliminados: []
+        };
+        state.escenario.setLugar(state.reconstruirLugar('bar'));
+        engine.ejecutar('tomar:espada', state);
+        engine.ejecutar('tomar:espada', state);
+        engine.ejecutar('equipar:espada', state);
+
+        const status = engine.ejecutar('status', state);
+        const data = status.data as { inventario: string[]; equipados: string[] };
+        expect(data.equipados).toEqual(['espada']);
+        expect(data.inventario.filter((nombre) => nombre === 'espada')).toHaveLength(1);
     });
 
     it('equipar un objeto que no está en inventario falla con ok:false', () => {
@@ -139,5 +375,59 @@ describe('Multi-sesión: dos GameState independientes no se interfieren', () => 
         const sesionB = crearGameState('B');
         expect(sesionA.jugadorBase).not.toBe(sesionB.jugadorBase);
         expect(sesionA.escenario).not.toBe(sesionB.escenario);
+    });
+});
+
+describe('GameEngine - help en el ciclo de sesión', () => {
+    it('help también funciona en el hub sin requerir una run activa', () => {
+        const engine = new GameEngine();
+        const profile: ProfileDTO = {
+            sessionId: 'sesion-hub',
+            schemaVersion: 2,
+            plata: 0,
+            mejoras: []
+        };
+        const contexto = new SesionContexto(profile, null, () => crearGameState('sesion-hub'));
+
+        const resultado = engine.ejecutarSesion('help', contexto);
+
+        expect(resultado.ok).toBe(true);
+        expect(resultado.message).toContain('Comandos disponibles:');
+        expect(resultado.message).toContain('- crear: Inicia una nueva run desde el hub.');
+        expect(resultado.message).toContain('- tienda: Lista la tienda disponible en el contexto actual, sea hub o run.');
+    });
+
+    it('help:<comando> también funciona en el hub', () => {
+        const engine = new GameEngine();
+        const profile: ProfileDTO = {
+            sessionId: 'sesion-hub-detalle',
+            schemaVersion: 2,
+            plata: 0,
+            mejoras: []
+        };
+        const contexto = new SesionContexto(profile, null, () => crearGameState('sesion-hub-detalle'));
+
+        const resultado = engine.ejecutarSesion('help:crear', contexto);
+
+        expect(resultado.ok).toBe(true);
+        expect(resultado.message).toBe('Comando: crear\nUso: crear\nDescripción: Inicia una nueva run desde el hub.');
+    });
+
+    it('ejecutarSesion acepta comandos y salidas con mayúsculas arbitrarias', () => {
+        const engine = new GameEngine();
+        const profile: ProfileDTO = {
+            sessionId: 'sesion-run',
+            schemaVersion: 2,
+            plata: 0,
+            mejoras: []
+        };
+        const contexto = new SesionContexto(profile, null, () => crearGameState('sesion-run'));
+
+        const crear = engine.ejecutarSesion('CrEaR', contexto);
+        const mover = engine.ejecutarSesion('MoVeR:EsTe', contexto);
+
+        expect(crear.ok).toBe(true);
+        expect(mover.ok).toBe(true);
+        expect(contexto.state!.lugarId).toBe('pasillo');
     });
 });

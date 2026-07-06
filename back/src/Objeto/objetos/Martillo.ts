@@ -15,4 +15,8 @@ export class Martillo extends Objeto {
     getEstrategiaDeAtaque(): IEstrategiaDeAtaque {
         return new MartilloStrategy();
     }
+
+    getDescripcion(): string {
+        return 'Un martillo pesado que golpea con contundencia. Sirve como arma para ataques más brutales al equiparlo.';
+    }
 }

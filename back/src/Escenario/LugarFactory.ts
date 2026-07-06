@@ -6,12 +6,17 @@ import SalaDeCombate from "./Lugar/lugares/SalaDeCombate";
 import SalaDeDescanso from "./Lugar/lugares/SalaDeDescanso";
 import SalaDelJefe from "./Lugar/lugares/SalaDelJefe";
 import SalaDeTienda from "./Lugar/lugares/SalaDeTienda";
+import {
+    EstadoMutableDeSala,
+    EstadoMutablePorSala,
+    obtenerEstadoMutableDeSala
+} from "../Game/EstadoMutableDeSala";
 import MapaDeRun from "./MapaDeRun";
 import MapaDeRunRegistry from "./MapaDeRunRegistry";
 import { TipoDeSala } from "./MapaLayout";
 
 /** Constructor de una `Sala` concreta a partir de su `lugarId` y su mapa. */
-type ConstructorDeSala = new (lugarId: string, mapa: MapaDeRun) => Sala;
+type ConstructorDeSala = new (lugarId: string, mapa: MapaDeRun, estadoMutable?: EstadoMutableDeSala) => Sala;
 
 /**
  * Fábrica de lugares (patrón Factory). Reconstruye el `ILugar` de una run a
@@ -56,15 +61,18 @@ export default class LugarFactory {
      */
     public static crear(
         lugarId: string,
-        semilla: number = MapaDeRunRegistry.SEMILLA_LAYOUT_FIJO
+        semilla: number = MapaDeRunRegistry.SEMILLA_LAYOUT_FIJO,
+        estadoMutablePorSala?: EstadoMutablePorSala
     ): ILugar {
         const mapa = MapaDeRunRegistry.obtener(semilla);
         const definicion = mapa.obtener(lugarId);
+        const lugarResueltoId = definicion ? definicion.id : LugarFactory.lugarInicial(semilla);
+        const estadoMutable = obtenerEstadoMutableDeSala(estadoMutablePorSala, lugarResueltoId);
         if (!definicion || definicion.tipo === 'bar') {
-            return new Bar(mapa);
+            return new Bar(mapa, estadoMutable);
         }
         const constructor = LugarFactory.porTipo[definicion.tipo];
-        return new constructor(lugarId, mapa);
+        return new constructor(lugarId, mapa, estadoMutable);
     }
 
     /** Id de la sala inicial del mapa de la `semilla` dada. */

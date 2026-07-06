@@ -1,6 +1,7 @@
 import { RunDTO } from "./dtos";
 import { RunRepository } from "./RunRepository";
 import { RunModel } from "./mongo";
+import { normalizarEstadoMutablePorSala } from "../Game/EstadoMutableDeSala";
 
 /**
  * Implementación de `RunRepository` sobre MongoDB Atlas (mongoose).
@@ -30,7 +31,7 @@ export default class MongoRunRepository implements RunRepository {
 }
 
 /** Deserialización tolerante: campos ausentes caen a defaults sensatos. */
-function normalizar(doc: RunDTO): RunDTO {
+export function normalizar(doc: RunDTO): RunDTO {
     const jugador = doc.jugador || ({} as RunDTO['jugador']);
     const escenario = doc.escenario || ({} as RunDTO['escenario']);
     return {
@@ -52,7 +53,8 @@ function normalizar(doc: RunDTO): RunDTO {
         },
         escenario: {
             lugarId: escenario.lugarId || 'bar',
-            salasVisitadas: Array.isArray(escenario.salasVisitadas) ? escenario.salasVisitadas : []
+            salasVisitadas: Array.isArray(escenario.salasVisitadas) ? escenario.salasVisitadas : [],
+            estadoMutablePorSala: normalizarEstadoMutablePorSala(escenario.estadoMutablePorSala)
         }
     };
 }

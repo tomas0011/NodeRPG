@@ -625,3 +625,92 @@ a {
   font-family: 'Cinzel', Georgia, serif;
   color: var(--acento);
 }
+
+/* --- Minimapa (PanelMapa) -------------------------------------------------- */
+
+.mapa {
+  --mapa-celda: 34px;
+  display: grid;
+  gap: 6px;
+  justify-content: center;
+  padding: 4px 0;
+  /* Mapas procedurales anchos: scroll dentro del panel, sin recortar celdas. */
+  max-width: 100%;
+  overflow: auto;
+}
+
+.mapa__celda {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--fondo-panel-alt);
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+  color: var(--texto-tenue);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.95rem;
+  user-select: none;
+}
+
+.mapa__celda--incognita {
+  border-style: dashed;
+  color: var(--texto-suave);
+  background: transparent;
+}
+
+.mapa__celda--actual {
+  border-color: var(--acento);
+  color: var(--acento-fuerte);
+  box-shadow: 0 0 0 2px var(--acento-tenue), 0 0 10px var(--acento-tenue);
+}
+
+/* Muescas de salida: marcas en el borde/esquina de la celda por dirección.
+   Van por celda (no como líneas entre celdas) porque una colisión del grafo
+   puede alejar salas conectadas. */
+.mapa__tick {
+  position: absolute;
+  background: var(--borde-fuerte);
+}
+
+.mapa__tick--norte,
+.mapa__tick--sur {
+  width: 10px;
+  height: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.mapa__tick--norte { top: -2px; }
+.mapa__tick--sur { bottom: -2px; }
+
+.mapa__tick--este,
+.mapa__tick--oeste {
+  width: 2px;
+  height: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.mapa__tick--este { right: -2px; }
+.mapa__tick--oeste { left: -2px; }
+
+.mapa__tick--noreste,
+.mapa__tick--suroeste,
+.mapa__tick--arriba,
+.mapa__tick--abajo {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.mapa__tick--noreste { top: -3px; right: -3px; }
+.mapa__tick--suroeste { bottom: -3px; left: -3px; }
+.mapa__tick--arriba { top: -3px; left: -3px; }
+.mapa__tick--abajo { bottom: -3px; right: -3px; }
+
+.mapa__leyenda {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  text-align: center;
+}
