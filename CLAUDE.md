@@ -41,9 +41,9 @@ Design patterns in play — recognize them before editing:
 
 ### Adding a new command
 
-1. Create a class in `back/src/Comando/comandos/` implementing `IComando`.
+1. Create a class in `back/src/Comando/comandos/` implementing `IComando` (`getKey`, `esComando`, `getUso`, `getDescripcion`, `ejecutar`). `getUso`/`getDescripcion` feed the `help` catalog automatically — there is no separate help registry.
 2. Re-export it from `back/src/Comando/index.ts`.
-3. Add an instance to the `comandos` array in `back/src/Comando/ComandosManager.ts`.
+3. Add an instance to the `comandos` array (or `comandosSesion` for hub/session commands) in `back/src/Game/GameEngine.ts`.
 
 ### Adding an equippable object
 

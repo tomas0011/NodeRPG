@@ -24,6 +24,14 @@ export default class Detalle implements IComandoSesion {
         return comando === this.getKey();
     }
 
+    getUso(): string {
+        return 'detalle:<runId>';
+    }
+
+    getDescripcion(): string {
+        return 'Muestra el detalle completo de una run guardada en tu historial.';
+    }
+
     ejecutar(runId: string, contexto: SesionContexto): CommandResult {
         if (!runId) {
             return {

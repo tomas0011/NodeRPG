@@ -8,7 +8,7 @@ import { Personaje } from "../Personaje";
  */
 export class Ogro extends Personaje {
     constructor() {
-        super(30);
+        super(26);
     }
 
     getVidaMaxima(): number {
@@ -28,7 +28,7 @@ export class Ogro extends Personaje {
     }
 
     dadoDeGolpe(): number {
-        return 9;
+        return 7;
     }
 
     claseDeArmadura(): number {

@@ -13,7 +13,7 @@ export interface CommandResponse {
   sessionId: string;
   content: string;
   ok: boolean;
-  enHub: boolean;
+  enHub?: boolean;
   data?: unknown;
   completions?: Record<string, string[]>;
 }
@@ -139,6 +139,23 @@ export interface EscenarioData {
   objetos: string[];
   salidas: Record<string, string>;
   salasVisitadas?: string[];
+}
+
+/** Sala del minimapa (`mapa`). Sin `nombre`/`tipo` si no fue visitada. */
+export interface SalaDeMapa {
+  id: string;
+  x: number;
+  y: number;
+  visitada: boolean;
+  salidas: string[];
+  nombre?: string;
+  tipo?: string;
+}
+
+/** `mapa` */
+export interface MapaData {
+  lugarActual: string;
+  salas: SalaDeMapa[];
 }
 
 /** `atacar` */

@@ -33,4 +33,23 @@ export default class CatalogoOcupantes {
         const constructor = CatalogoOcupantes.npcs[id];
         return constructor ? new constructor() : undefined;
     }
+
+    /**
+     * Resuelve el id lógico del ocupante ya instanciado (enemigo o NPC).
+     */
+    public static resolverId(ocupante: Personaje): string | undefined {
+        const enemigoId = CatalogoEnemigos.resolverId(ocupante);
+        if (enemigoId) {
+            return enemigoId;
+        }
+
+        for (const id of Object.keys(CatalogoOcupantes.npcs)) {
+            const constructor = CatalogoOcupantes.npcs[id];
+            if (ocupante instanceof constructor) {
+                return id;
+            }
+        }
+
+        return undefined;
+    }
 }

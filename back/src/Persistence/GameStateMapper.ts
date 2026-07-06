@@ -1,5 +1,6 @@
 import { Escenario } from "../Escenario/Escenario";
 import LugarFactory from "../Escenario/LugarFactory";
+import { normalizarEstadoMutablePorSala } from "../Game/EstadoMutableDeSala";
 import GameState from "../Game/GameState";
 import ObjetoFactory from "../Objeto/ObjetoFactory";
 import { PersonajeJugable } from "../Personaje/personajes/Jugador";
@@ -40,7 +41,8 @@ export default class GameStateMapper {
 
         const escenario: EscenarioDTO = {
             lugarId: state.lugarId,
-            salasVisitadas: state.salasVisitadas.slice()
+            salasVisitadas: state.salasVisitadas.slice(),
+            estadoMutablePorSala: normalizarEstadoMutablePorSala(state.estadoMutablePorSala)
         };
 
         return {
@@ -90,9 +92,18 @@ export default class GameStateMapper {
         const semilla = typeof dto.semilla === 'number' ? dto.semilla : 0;
         // Sala inicial del mapa de esa semilla, por si el DTO no trae lugarId.
         const lugarId = (dto.escenario && dto.escenario.lugarId) || LugarFactory.lugarInicial(semilla);
-        const salasVisitadas = (dto.escenario && dto.escenario.salasVisitadas) || [];
+        const salasVisitadas = ((dto.escenario && dto.escenario.salasVisitadas) || []).slice();
+        // Backfill para runs persistidas antes de sembrar la sala inicial: el
+        // jugador siempre arranca ahí, así que el minimapa debe conocerla.
+        const salaInicial = LugarFactory.lugarInicial(semilla);
+        if (!salasVisitadas.includes(salaInicial)) {
+            salasVisitadas.unshift(salaInicial);
+        }
+        const estadoMutablePorSala = normalizarEstadoMutablePorSala(
+            dto.escenario && dto.escenario.estadoMutablePorSala
+        );
         // Reconstruye la sala actual dentro del mapa de la semilla (determinista).
-        const escenario = new Escenario(LugarFactory.crear(lugarId, semilla));
+        const escenario = new Escenario(LugarFactory.crear(lugarId, semilla, estadoMutablePorSala));
 
         const state = new GameState(
             jugadorBase,
@@ -101,7 +112,8 @@ export default class GameStateMapper {
             dto.runId,
             semilla,
             lugarId,
-            salasVisitadas.slice()
+            salasVisitadas.slice(),
+            estadoMutablePorSala
         );
 
         // Plata acumulada (tolerante: docs viejos sin el campo caen a 0).

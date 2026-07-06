@@ -17,7 +17,7 @@ import { Cantinero } from '../src/Personaje/personajes/Cantinero';
  * Deterministas, InMemory, sin red. Cubren: getBotin separado de getRecompensa;
  * el loot se suelta en la sala al morir el enemigo; ids válidos de ObjetoFactory;
  * un enemigo sin botín no suelta nada; el loot tomado persiste en el inventario
- * tras round-trip toDTO/fromDTO; loot del suelo es efímero (documentado).
+ * y el loot no tomado persiste en la sala vía `estadoMutablePorSala`.
  */
 describe('getBotin() por enemigo (objetos, separado de getRecompensa)', () => {
     it('Rata y Cantinero no sueltan objetos (botín vacío)', () => {
@@ -95,6 +95,9 @@ describe('Atacar — el loot cae en la sala al derrotar al enemigo', () => {
         const objetosSala = state.escenario.getLugar().getObjetos().map((o) => o.getNombre());
         expect(objetosSala).toContain('poción de curación');
         expect(state.escenario.getLugar().getObjetos().length).toBe(objetosAntes + 1);
+        expect(state.obtenerEstadoMutableDeSala('sala-combate').objetosAgregadosAlSuelo).toEqual([
+            'poción de curación'
+        ]);
     });
 
     it('matar al Ogro suelta sus dos objetos en la sala', () => {
@@ -107,6 +110,10 @@ describe('Atacar — el loot cae en la sala al derrotar al enemigo', () => {
         expect((r.data as { botin: string[] }).botin).toEqual(['armadura de placas', 'martillo']);
         const objetosSala = state.escenario.getLugar().getObjetos().map((o) => o.getNombre());
         expect(objetosSala).toEqual(expect.arrayContaining(['armadura de placas', 'martillo']));
+        expect(state.obtenerEstadoMutableDeSala('sala-jefe').objetosAgregadosAlSuelo).toEqual([
+            'armadura de placas',
+            'martillo'
+        ]);
     });
 
     it('un enemigo sin botín (Rata) no suelta objetos', () => {
@@ -141,7 +148,7 @@ describe('Atacar — el loot cae en la sala al derrotar al enemigo', () => {
     });
 });
 
-describe('Persistencia del loot: tomado persiste, suelo es efímero', () => {
+describe('Persistencia del loot: tomado persiste y el suelo agregado también', () => {
     let engine: GameEngine;
 
     beforeEach(() => {
@@ -170,21 +177,39 @@ describe('Persistencia del loot: tomado persiste, suelo es efímero', () => {
         expect(invRecargado).toContain('martillo');
     });
 
-    it('el loot NO tomado (suelo) es efímero: la sala se reconstruye por lugarId sin él', () => {
-        const state = crearGameState('s-efimero');
+    it('el loot NO tomado persiste al reconstruir la sala actual por lugarId', () => {
+        const state = crearGameState('s-reconstruccion');
         state.escenario.setLugar(LugarFactory.crear('sala-jefe'));
         state.lugarId = 'sala-jefe';
         const ogro = state.escenario.getLugar().getPersonajes().find((p) => p.getNombre() === 'Ogro')!;
         ogro.vidaActual = 1;
         engine.ejecutar('atacar:Ogro', state); // suelta loot en el suelo, NO se toma
 
-        // Round-trip: la sala se reconstruye desde el lugarId (layout fijo); el
-        // loot del suelo no se serializa, así que no reaparece (efímero, 3h lo
-        // hará determinista por semilla).
-        const recargado = GameStateMapper.fromDTO(GameStateMapper.toDTO(state));
+        const salaReconstruida = state.reconstruirLugar('sala-jefe');
+        const objetosReconstruidos = salaReconstruida.getObjetos().map((o) => o.getNombre());
+        expect(objetosReconstruidos).toEqual(
+            expect.arrayContaining(['martillo', 'armadura de placas'])
+        );
+    });
+
+    it('el loot NO tomado persiste tras round-trip toDTO/fromDTO', () => {
+        const state = crearGameState('s-persistencia-suelo');
+        state.escenario.setLugar(LugarFactory.crear('sala-jefe'));
+        state.lugarId = 'sala-jefe';
+        const ogro = state.escenario.getLugar().getPersonajes().find((p) => p.getNombre() === 'Ogro')!;
+        ogro.vidaActual = 1;
+        engine.ejecutar('atacar:Ogro', state); // suelta loot en el suelo, NO se toma
+
+        const dto = GameStateMapper.toDTO(state);
+        expect(dto.escenario.estadoMutablePorSala?.['sala-jefe']?.objetosAgregadosAlSuelo).toEqual([
+            'armadura de placas',
+            'martillo'
+        ]);
+
+        const recargado = GameStateMapper.fromDTO(dto);
         const salaRecargada = recargado.escenario.getLugar().getObjetos().map((o) => o.getNombre());
-        expect(salaRecargada).not.toContain('martillo');
-        expect(salaRecargada).not.toContain('armadura de placas');
+        expect(salaRecargada).toContain('martillo');
+        expect(salaRecargada).toContain('armadura de placas');
     });
 });
 

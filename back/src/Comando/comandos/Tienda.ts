@@ -27,6 +27,14 @@ export default class Tienda implements IComandoSesion {
         return comando === this.getKey();
     }
 
+    getUso(): string {
+        return 'tienda';
+    }
+
+    getDescripcion(): string {
+        return 'Lista la tienda disponible en el contexto actual, sea hub o run.';
+    }
+
     ejecutar(_agente: string, contexto: SesionContexto): CommandResult {
         return contexto.enHub() ? this.tiendaHub(contexto) : this.tiendaRun(contexto);
     }

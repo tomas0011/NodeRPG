@@ -70,7 +70,11 @@ const JugadorSchema = new Schema<JugadorDTO>(
 const EscenarioSchema = new Schema<EscenarioDTO>(
     {
         lugarId: { type: String, required: true, default: 'bar' },
-        salasVisitadas: { type: [String], required: true, default: [] }
+        salasVisitadas: { type: [String], required: true, default: [] },
+        // Delta por sala (v3). `Mixed` porque está indexado por lugarId dinámico;
+        // la validación de forma la hace `normalizarEstadoMutablePorSala` al cargar.
+        // Sin esto, el modo `strict` de Mongoose descarta el campo en cada save.
+        estadoMutablePorSala: { type: Schema.Types.Mixed, required: false, default: {} }
     },
     { _id: false }
 );

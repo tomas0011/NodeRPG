@@ -6,4 +6,8 @@ export class Taza extends Objeto {
     }
 
     getModificacion() {}
+
+    getDescripcion(): string {
+        return 'Una taza común sin propiedades especiales. Puedes guardarla como curiosidad, pero no ofrece efectos ni equipo.';
+    }
 } 

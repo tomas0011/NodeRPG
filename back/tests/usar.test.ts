@@ -82,9 +82,22 @@ describe('Comando usar (vía GameEngine)', () => {
         const vidaDespues = state.jugador.getVidaActual();
         expect(vidaDespues).toBeGreaterThan(vidaAntes);
         expect(vidaDespues).toBeLessThanOrEqual(vidaMaxima);
-        // Curación de 5 sobre la vida dañada.
-        expect(vidaDespues).toBe(vidaAntes + 5);
+        // Curación de 8 sobre la vida dañada.
+        expect(vidaDespues).toBe(vidaAntes + 8);
         // Se consumió la poción.
+        expect(tieneObjeto('poción de curación')).toBe(false);
+    });
+
+    it('usar una poción sin tilde y con mayúsculas mixtas resuelve el nombre canónico', () => {
+        state.jugadorBase.getInventario().agregarObjeto(new PocionDeCuracion());
+        state.jugador.recibirDaño(5);
+
+        const r = engine.ejecutar('UsAr:PoCiOn De CuRaCiOn', state);
+        const data = r.data as { objeto: string };
+
+        expect(r.ok).toBe(true);
+        expect(data.objeto).toBe('poción de curación');
+        expect(r.message).toContain('"poción de curación"');
         expect(tieneObjeto('poción de curación')).toBe(false);
     });
 

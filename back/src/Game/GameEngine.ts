@@ -1,3 +1,4 @@
+import AyudaDeComando from "../Comando/AyudaDeComando";
 import IComando from "../Comando/IComando";
 import IComandoSesion from "../Comando/IComandoSesion";
 import {
@@ -5,18 +6,22 @@ import {
     Atacar,
     Comprar,
     CrearPersonaje,
+    DesequiparObjeto,
     Detalle,
     EquiparObjeto,
     GetEscenario,
     GetHelp,
     GetStatus,
     Historial,
+    InspeccionarObjeto,
+    Mapa,
     Mover,
     Perfil,
     Tienda,
     TomarObjeto,
     UsarObjeto
 } from "../Comando";
+import { resolverValorCanonico } from "../Input/normalizarEntrada";
 import CommandResult from "./CommandResult";
 import GameState from "./GameState";
 import SesionContexto from "./SesionContexto";
@@ -42,20 +47,24 @@ export default class GameEngine {
     public readonly comandosSesion: IComandoSesion[];
 
     constructor() {
-        // GetHelp necesita conocer las claves disponibles; se las inyectamos
+        // GetHelp necesita conocer el catálogo disponible; se lo inyectamos
         // para no reintroducir un acceso global al manager.
-        const getHelp = new GetHelp(() => this.todasLasClaves());
+        const getHelp = new GetHelp(() => this.todasLasAyudas());
         this.comandos = [
             new GetEscenario(),
             getHelp,
             new GetStatus(),
             new TomarObjeto(),
+            new InspeccionarObjeto(),
             new EquiparObjeto(),
+            new DesequiparObjeto(),
             new Atacar(),
             new UsarObjeto(),
-            new Mover()
+            new Mover(),
+            new Mapa()
         ];
         this.comandosSesion = [
+            getHelp,
             new CrearPersonaje(),
             new Abandonar(),
             new Perfil(),
@@ -67,19 +76,36 @@ export default class GameEngine {
     }
 
     private getComando(comando: string): IComando | undefined {
-        return this.comandos.find((c: IComando) => c.esComando(comando));
+        return resolverValorCanonico(comando, this.comandos, (c: IComando) => c.getKey());
     }
 
     private getComandoSesion(comando: string): IComandoSesion | undefined {
-        return this.comandosSesion.find((c: IComandoSesion) => c.esComando(comando));
+        return resolverValorCanonico(comando, this.comandosSesion, (c: IComandoSesion) => c.getKey());
     }
 
-    /** Claves de todos los comandos (juego + sesión), para el `GetHelp`. */
-    private todasLasClaves(): string[] {
-        return [
-            ...this.comandos.map((c) => c.getKey()),
-            ...this.comandosSesion.map((c) => c.getKey())
-        ];
+    /**
+     * Ayudas de todos los comandos (juego + sesión), para el `GetHelp`.
+     * Cada comando se autodescribe vía `getUso`/`getDescripcion` (mismo patrón
+     * que `Objeto.getDescripcion`): registrar un comando basta para que
+     * aparezca completo en la ayuda, sin catálogos paralelos.
+     */
+    private todasLasAyudas(): AyudaDeComando[] {
+        const todos: Array<IComando | IComandoSesion> = [...this.comandos, ...this.comandosSesion];
+        const vistos = new Set<string>();
+        const ayudas: AyudaDeComando[] = [];
+        for (const comando of todos) {
+            const clave = comando.getKey();
+            if (vistos.has(clave)) {
+                continue;
+            }
+            vistos.add(clave);
+            ayudas.push({
+                clave,
+                uso: comando.getUso(),
+                descripcion: comando.getDescripcion()
+            });
+        }
+        return ayudas;
     }
 
     /**
@@ -132,7 +158,9 @@ export default class GameEngine {
     }
 
     private parsear(input: string): [string, string] {
-        const [comando, agente] = input.split(':').map((fragmento: string) => fragmento.trim());
+        const fragmentos = input.split(':');
+        const comando = (fragmentos[0] || '').trim();
+        const agente = fragmentos.slice(1).join(':').trim();
         return [comando, agente];
     }
 }

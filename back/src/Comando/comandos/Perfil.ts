@@ -21,6 +21,14 @@ export default class Perfil implements IComandoSesion {
         return comando === this.getKey();
     }
 
+    getUso(): string {
+        return 'perfil';
+    }
+
+    getDescripcion(): string {
+        return 'Muestra la plata persistente, tus mejoras y el estado de la sesión.';
+    }
+
     ejecutar(_agente: string, contexto: SesionContexto): CommandResult {
         const profile = contexto.profile;
         const enHub = contexto.enHub();

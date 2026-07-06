@@ -136,6 +136,14 @@ describe('Comando atacar (vía GameEngine)', () => {
         expect((r.data as { daño: number }).daño).toBe(2);
     });
 
+    it('atacar resuelve nombres de NPC con mayúsculas arbitrarias', () => {
+        const r = engine.ejecutar('AtAcAr:cAnTiNeRo pEpE', state);
+        const data = r.data as { objetivo: string };
+
+        expect(r.ok).toBe(true);
+        expect(data.objetivo).toBe('Cantinero Pepe');
+    });
+
     it('con espada equipada el daño sale de EspadaStrategy (CA Cantinero = 11)', () => {
         engine.ejecutar('tomar:espada', state);
         engine.ejecutar('equipar:espada', state);
@@ -202,5 +210,27 @@ describe('Comando atacar (vía GameEngine)', () => {
         expect(dArco).toBe(5);
         expect(dMartillo).toBe(13);
         expect(dMartillo).toBeGreaterThan(dEspada);
+    });
+});
+
+describe('Mitigación del contraataque por armadura (balance 3j)', () => {
+    it('la armadura de cuero reduce el daño recibido frente a ir sin armadura', () => {
+        const engine = new GameEngine();
+
+        // Sin armadura: CA 11 → mitigación 0; Cantinero dado 4 → recibe 4.
+        const sinArmadura = crearGameState('mit-1');
+        const r1 = engine.ejecutar('atacar:Cantinero Pepe', sinArmadura);
+        const daño1 = (r1.data as { dañoRecibido: number }).dañoRecibido;
+        expect(daño1).toBe(4);
+
+        // Con cuero: CA 14 → mitigación floor(4/2)=2 → recibe 2.
+        const conCuero = crearGameState('mit-2');
+        engine.ejecutar('tomar:armadura de cuero', conCuero);
+        engine.ejecutar('equipar:armadura de cuero', conCuero);
+        const r2 = engine.ejecutar('atacar:Cantinero Pepe', conCuero);
+        const daño2 = (r2.data as { dañoRecibido: number }).dañoRecibido;
+        expect(daño2).toBe(2);
+
+        expect(daño2).toBeLessThan(daño1);
     });
 });

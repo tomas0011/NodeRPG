@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { comandosDeContexto, definicionDe } from '../data/comandos';
+import { coincidePorPrefijo, normalizarEntrada } from '../utils/normalizarEntrada';
 
 interface UseAutocompleteArgs {
   /** Texto actual del input. */
@@ -38,17 +39,17 @@ export function useAutocomplete({
 
     if (indiceDosPuntos === -1) {
       // Sugerir nombres de comando del contexto que empiecen por el prefijo.
-      const prefijo = texto.toLowerCase();
+      const prefijo = normalizarEntrada(texto);
       const comandos = comandosDeContexto(enHub).map((c) => c.nombre);
       if (!prefijo) {
-        return comandos;
+        return [];
       }
-      return comandos.filter((nombre) => nombre.startsWith(prefijo));
+      return comandos.filter((nombre) => coincidePorPrefijo(nombre, prefijo));
     }
 
     // Sugerir argumentos del comando tras los dos puntos.
-    const nombreComando = texto.slice(0, indiceDosPuntos).trim().toLowerCase();
-    const argParcial = texto.slice(indiceDosPuntos + 1).toLowerCase();
+    const nombreComando = texto.slice(0, indiceDosPuntos).trim();
+    const argParcial = normalizarEntrada(texto.slice(indiceDosPuntos + 1));
     const def = definicionDe(nombreComando);
     const clave = def?.claveCompletions;
     if (!clave) {
@@ -56,9 +57,9 @@ export function useAutocomplete({
     }
     const opciones = completions[clave] || [];
     if (!argParcial) {
-      return opciones;
+      return [];
     }
-    return opciones.filter((opcion) => opcion.toLowerCase().startsWith(argParcial));
+    return opciones.filter((opcion) => coincidePorPrefijo(opcion, argParcial));
   }, [valor, enHub, completions]);
 
   const aplicar = useMemo(() => {

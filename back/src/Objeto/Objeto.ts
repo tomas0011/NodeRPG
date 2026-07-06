@@ -38,6 +38,15 @@ export abstract class Objeto{
         return undefined;
     }
 
+    /**
+     * Descripción legible del objeto para comandos de inspección. Los objetos
+     * concretos pueden sobreescribirla para aportar detalle específico sin
+     * centralizar la lógica por nombre en otro módulo.
+     */
+    getDescripcion(): string {
+        return `Es un objeto de tipo ${this.getClase()}.`;
+    }
+
     getNombre(){
         return this.nombre;
     }

@@ -20,6 +20,14 @@ export default class Abandonar implements IComandoSesion {
         return comando === this.getKey();
     }
 
+    getUso(): string {
+        return 'abandonar';
+    }
+
+    getDescripcion(): string {
+        return 'Termina la run actual, banca la plata y te devuelve al hub.';
+    }
+
     ejecutar(_agente: string, contexto: SesionContexto): CommandResult {
         const state = contexto.state;
         if (state === null) {

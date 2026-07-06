@@ -200,9 +200,9 @@ describe('GetStatus muestra nivel y xp', () => {
     });
 });
 
-describe('Persistencia v2: round-trip y tolerancia v1→v2', () => {
-    it('SCHEMA_VERSION es 2', () => {
-        expect(SCHEMA_VERSION).toBe(2);
+describe('Persistencia v3: round-trip y tolerancia v1→v3', () => {
+    it('SCHEMA_VERSION es 3', () => {
+        expect(SCHEMA_VERSION).toBe(3);
     });
 
     it('round-trip toDTO/fromDTO conserva xp y nivel', () => {
